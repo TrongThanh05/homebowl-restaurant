@@ -805,6 +805,12 @@ input[type="date" i] {
 /*[ Slick1 ]
 -----------------------------------------------------------
 */
+/* Fix: section-slide cần có chiều cao để background hiển thị */
+.section-slide {
+  position: relative;
+  overflow: hidden;
+}
+
 .wrap-slick1,
 .wrap-slick2,
 .wrap-slick3 {
@@ -818,8 +824,20 @@ input[type="date" i] {
   background-repeat: no-repeat;
   background-position: center center;
 }
+/* Update 24/10 when slider is no longer showed */
 .item-slick1 {
   height: 100vh;
+}
+
+/* Fix: Slick fade mode cần toàn bộ chain height đúng */
+.wrap-slick1 .slick-slider {
+  height: 100vh;
+}
+.wrap-slick1 .slick-list,
+.wrap-slick1 .slick-track,
+.wrap-slick1 .slick-slide,
+.wrap-slick1 .slick-slide div {
+  height: 100%;
 }
 
 .arrow-slick1, .arrow-slick2, .arrow-slick3 {

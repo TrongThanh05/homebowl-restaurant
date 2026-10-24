@@ -1,73 +1,76 @@
+import { Link } from 'react-router-dom';
+import { getImage } from '../../utils/images';
+
 const BlogSection = () => {
   return (
-    <section class="section-blog bg-white p-t-115 p-b-123">
-      <div class="container">
-        <div class="title-section-ourmenu t-center m-b-22">
-          <span class="tit2 t-center">Latest News</span>
+    <section className="section-blog bg-white p-t-115 p-b-123">
+      <div className="container">
+        <div className="title-section-ourmenu t-center m-b-22">
+          <span className="tit2 t-center">Latest News</span>
 
-          <h3 class="tit5 t-center m-t-2">The Blog</h3>
+          <h3 className="tit5 t-center m-t-2">The Blog</h3>
         </div>
 
-        <div class="row">
-          <div class="col-md-4 p-t-30">
-            <div class="blo1">
-              <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
-                <Link to="BlogDetail">
-                  <img src="images/blog-01.jpg" alt="IMG-INTRO" />
+        <div className="row">
+          <div className="col-md-4 p-t-30">
+            <div className="blo1">
+              <div className="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
+                <Link to="/BlogDetail">
+                  <img src={getImage('blog-01.jpg')} alt="IMG-INTRO" />
                 </Link>
 
-                <div class="time-blog">21 Dec 2017</div>
+                <div className="time-blog">21 Dec 2017</div>
               </div>
 
-              <div class="wrap-text-blo1 p-t-35">
-                <Link to="BlogDetail">
-                  <h4 class="txt5 color0-hov trans-0-4 m-b-13">
+              <div className="wrap-text-blo1 p-t-35">
+                <Link to="/BlogDetail">
+                  <h4 className="txt5 color0-hov trans-0-4 m-b-13">
                     Best Places for Wine
                   </h4>
                 </Link>
 
-                <p class="m-b-20">
+                <p className="m-b-20">
                   Phasellus lorem enim, luctus ut velit eget, con-vallis egestas
                   eros.
                 </p>
 
-                <a href="blog-detail.html" class="txt4">
+                <Link to="/BlogDetail" className="txt4">
                   Continue Reading
                   <i
-                    class="fa fa-long-arrow-right m-l-10"
+                    className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"
                   ></i>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
 
-          <div class="col-md-4 p-t-30">
-            <div class="blo1">
-              <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
-                <Link to="BlogDetail">
-                  <img src="images/blog-02.jpg" alt="IMG-INTRO" />
+          <div className="col-md-4 p-t-30">
+            <div className="blo1">
+              <div className="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
+                <Link to="/BlogDetail">
+                  <img src={getImage('blog-02.jpg')} alt="IMG-INTRO" />
                 </Link>
 
-                <div class="time-blog">15 Dec 2017</div>
+                <div className="time-blog">15 Dec 2017</div>
               </div>
 
-              <div class="wrap-text-blo1 p-t-35">
-                <Link to="BlogDetail">
-                  <h4 class="txt5 color0-hov trans-0-4 m-b-13">
+              <div className="wrap-text-blo1 p-t-35">
+                <Link to="/BlogDetail">
+                  <h4 className="txt5 color0-hov trans-0-4 m-b-13">
                     Eggs and Cheese
                   </h4>
                 </Link>
 
-                <p class="m-b-20">
+                <p className="m-b-20">
                   Duis elementum, risus sit amet lobortis nunc justo condimentum
                   ligula, vitae feugiat
                 </p>
 
-                <Link to="BlogDetail" class="txt4">
+                <Link to="/BlogDetail" className="txt4">
                   Continue Reading
                   <i
-                    class="fa fa-long-arrow-right m-l-10"
+                    className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"
                   ></i>
                 </Link>
@@ -75,32 +78,32 @@ const BlogSection = () => {
             </div>
           </div>
 
-          <div class="col-md-4 p-t-30">
-            <div class="blo1">
-              <div class="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
-                <Link to="BlogDetail">
-                  <img src="images/blog-03.jpg" alt="IMG-INTRO" />
+          <div className="col-md-4 p-t-30">
+            <div className="blo1">
+              <div className="wrap-pic-blo1 bo-rad-10 hov-img-zoom pos-relative">
+                <Link to="/BlogDetail">
+                  <img src={getImage('blog-03.jpg')} alt="IMG-INTRO" />
                 </Link>
 
-                <div class="time-blog">12 Dec 2017</div>
+                <div className="time-blog">12 Dec 2017</div>
               </div>
 
-              <div class="wrap-text-blo1 p-t-35">
-                <Link to="BlogDetail">
-                  <h4 class="txt5 color0-hov trans-0-4 m-b-13">
+              <div className="wrap-text-blo1 p-t-35">
+                <Link to="/BlogDetail">
+                  <h4 className="txt5 color0-hov trans-0-4 m-b-13">
                     Style the Wedding Party
                   </h4>
                 </Link>
 
-                <p class="m-b-20">
+                <p className="m-b-20">
                   Sed ornare ligula eget tortor tempor, quis porta tellus
                   dictum.
                 </p>
 
-                <Link to="BlogDetail" class="txt4">
+                <Link to="/BlogDetail" className="txt4">
                   Continue Reading
                   <i
-                    class="fa fa-long-arrow-right m-l-10"
+                    className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"
                   ></i>
                 </Link>

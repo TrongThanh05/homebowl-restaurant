@@ -1,3 +1,11 @@
+const footerGallery = Array.from({ length: 12 }, (_, i) => {
+  const num = String(i + 1).padStart(2, '0');
+  return {
+    full: new URL(`../../assets/images/photo-gallery-${num}.jpg`, import.meta.url).href,
+    thumb: new URL(`../../assets/images/photo-gallery-thumb-${num}.jpg`, import.meta.url).href,
+  };
+});
+
 export default function Footer() {
   return (
     <footer className="bg1">
@@ -35,7 +43,6 @@ export default function Footer() {
 
             <ul>
               <li className="txt14">09:30 AM – 11:00 PM</li>
-
               <li className="txt14">Every Day</li>
             </ul>
           </div>
@@ -44,12 +51,16 @@ export default function Footer() {
             <h4 className="txt13 m-b-33">Latest twitter</h4>
 
             <div className="m-b-25">
-              <Link to="\">
+              <a
+                href="https://twitter.com/colorlib"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span className="fs-13 color2 m-r-5">
                   <i className="fa fa-twitter" aria-hidden="true"></i>
                 </span>
                 @colorlib
-              </Link>
+              </a>
               <p className="txt14 m-b-18">
                 Activello is a good option. It has a slider built into that
                 displays the featured image in the slider.
@@ -58,20 +69,28 @@ export default function Footer() {
             </div>
 
             <div>
-              <Link to="\">
+              <a
+                href="https://twitter.com/colorlib"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span className="fs-13 color2 m-r-5">
                   <i className="fa fa-twitter" aria-hidden="true"></i>
                 </span>
                 @colorlib
-              </Link>
+              </a>
               <p className="txt14 m-b-18">
                 Activello is a good option. It has a slider built into that
-                displays
-                <a href="#" className="txt15">
+                displays{' '}
+                <a
+                  href="https://buff.ly/2zaSfAQ"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="txt15"
+                >
                   https://buff.ly/2zaSfAQ
                 </a>
               </p>
-
               <span className="txt16">21 Dec 2017</span>
             </div>
           </div>
@@ -80,101 +99,16 @@ export default function Footer() {
             <h4 className="txt13 m-b-38">Gallery</h4>
 
             <div className="wrap-gallery-footer flex-w">
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-01.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-01.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-02.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-02.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-03.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-03.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-04.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-04.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-05.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-05.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-06.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-06.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-07.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-07.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-08.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-08.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-09.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-09.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-10.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-10.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-11.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-11.jpg" alt="GALLERY" />
-              </a>
-
-              <a
-                className="item-gallery-footer wrap-pic-w"
-                href="images/photo-gallery-12.jpg"
-                data-lightbox="gallery-footer"
-              >
-                <img src="images/photo-gallery-thumb-12.jpg" alt="GALLERY" />
-              </a>
+              {footerGallery.map((item, index) => (
+                <a
+                  key={index}
+                  className="item-gallery-footer wrap-pic-w"
+                  href={item.full}
+                  data-lightbox="gallery-footer"
+                >
+                  <img src={item.thumb} alt="GALLERY" />
+                </a>
+              ))}
             </div>
           </div>
         </div>
@@ -198,7 +132,7 @@ export default function Footer() {
             <div className="txt17 p-r-20 p-t-5 p-b-5">
               Copyright &copy; 2018 All rights reserved | This template is made
               with <i className="fa fa-heart"></i> by{' '}
-              <a href="https://colorlib.com" target="_blank">
+              <a href="https://colorlib.com" target="_blank" rel="noopener noreferrer">
                 Colorlib
               </a>
             </div>

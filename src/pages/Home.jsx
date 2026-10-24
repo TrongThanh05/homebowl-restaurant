@@ -8,7 +8,7 @@ import MenuSection from '../components/common/MenuSection';
 import ReviewSection from '../components/common/ReviewSection';
 import Sidebar from '../components/common/Sidebar';
 import SignUpSection from '../components/common/SignUpSection';
-import SlideShow from '../components/common/SlideShow';
+import HeroSlider from '../components/common/HeroSlider';
 import VideoModal from '../components/common/VideoModal';
 import VideoSection from '../components/common/VideoSection';
 import WelcomeSection from '../components/common/WelcomeSection';
@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       <Sidebar />
-      <SlideShow />
+      <HeroSlider />
       <WelcomeSection />
       <IntroSection />
       <MenuSection />

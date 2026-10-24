@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { getImage } from '../../utils/images';
+
 const WelcomeSection = () => {
   return (
     <section className="section-welcome bg1-pattern p-t-120 p-b-105">
@@ -15,19 +18,19 @@ const WelcomeSection = () => {
                 ac facilisis ligula sem id neque.
               </p>
 
-              <a href="about.html" className="txt4">
+              <Link to="/About" className="txt4">
                 Our Story
                 <i
                   className="fa fa-long-arrow-right m-l-10"
                   aria-hidden="true"
                 ></i>
-              </a>
+              </Link>
             </div>
           </div>
 
           <div className="col-md-6 p-b-30">
             <div className="wrap-pic-welcome size2 bo-rad-10 hov-img-zoom m-l-r-auto">
-              <img src=".src/assets/images/our-story-01.jpg" alt="IMG-OUR" />
+              <img src={getImage('our-story-01.jpg')} alt="IMG-OUR" />
             </div>
           </div>
         </div>

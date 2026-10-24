@@ -1,29 +1,31 @@
+import { getImage } from '../../utils/images';
+
 const VideoModal = () => {
   return (
     <div
-      class="modal fade"
+      className="modal fade"
       id="modal-video-01"
-      tabindex="-1"
+      tabIndex="-1"
       role="dialog"
       aria-hidden="true"
     >
-      <div class="modal-dialog" role="document" data-dismiss="modal">
+      <div className="modal-dialog" role="document" data-dismiss="modal">
         <div
-          class="close-mo-video-01 trans-0-4"
+          className="close-mo-video-01 trans-0-4"
           data-dismiss="modal"
           aria-label="Close"
         >
           &times;
         </div>
 
-        <div class="wrap-video-mo-01">
-          <div class="w-full wrap-pic-w op-0-0">
-            <img src="images/icons/video-16-9.jpg" alt="IMG" />
+        <div className="wrap-video-mo-01">
+          <div className="w-full wrap-pic-w op-0-0">
+            <img src={getImage('icons/video-16-9.jpg')} alt="IMG" />
           </div>
-          <div class="video-mo-01">
+          <div className="video-mo-01">
             <iframe
               src="https://www.youtube.com/embed/5k1hSu2gdKE?rel=0&amp;showinfo=0"
-              allowfullscreen
+              allowFullScreen
             ></iframe>
           </div>
         </div>

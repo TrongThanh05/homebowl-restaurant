@@ -1,84 +1,87 @@
-const EventSection = () => {
-  return (
-    <section class="section-event">
-      <div class="wrap-slick2">
-        <div class="slick2">
-          <div
-            class="item-slick2 item1-slick2"
-            style="background-image: url(images/bg-event-01.jpg);"
-          >
-            <div class="wrap-content-slide2 p-t-115 p-b-208">
-              <div class="container">
-                <div class="title-event t-center m-b-52">
-                  <span class="tit2 p-l-15 p-r-15">Upcomming</span>
+import { Link } from 'react-router-dom';
+import { getImage } from '../../utils/images';
 
-                  <h3 class="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
+export default function EventSection() {
+  return (
+    <section className="section-event">
+      <div className="wrap-slick2">
+        <div className="slick2">
+          <div
+            className="item-slick2 item1-slick2"
+            style={{ backgroundImage: `url(${getImage('bg-event-01.jpg')})` }}
+          >
+            <div className="wrap-content-slide2 p-t-115 p-b-208">
+              <div className="container">
+                <div className="title-event t-center m-b-52">
+                  <span className="tit2 p-l-15 p-r-15">Upcomming</span>
+
+                  <h3 className="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
                 </div>
 
                 <div
-                  class="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
+                  className="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
                   data-appear="zoomIn"
                 >
                   <Link
                     to="#"
-                    class="wrap-pic-blo2 bg1-blo2"
-                    style="background-image: url(images/event-02.jpg);"
+                    className="wrap-pic-blo2 bg1-blo2"
+                    style={{ backgroundImage: `url(${getImage('event-02.jpg')})` }}
                   >
-                    <div class="time-event size10 txt6 effect1">
-                      <span class="txt-effect1 flex-c-m t-center">
+                    <div className="time-event size10 txt6 effect1">
+                      <span className="txt-effect1 flex-c-m t-center">
                         08:00 PM Tuesday - 21 November 2018
                       </span>
                     </div>
                   </Link>
 
-                  <div class="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
-                    <h4 class="tit7 t-center m-b-10">
+                  <div className="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
+                    <h4 className="tit7 t-center m-b-10">
                       Wines during specific nights
                     </h4>
 
-                    <p class="t-center">
+                    <p className="t-center">
                       Donec quis lorem nulla. Nunc eu odio mi. Morbi nec
                       lobortis est. Sed fringilla, nunc sed imperdiet lacinia
                     </p>
 
-                    <div class="flex-sa-m flex-w w-full m-t-40">
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 days">
+                    <div className="flex-sa-m flex-w w-full m-t-40">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 days">
                           25
                         </span>
 
-                        <span class="dis-block t-center txt8">Days</span>
+                        <span className="dis-block t-center txt8">Days</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 hours">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 hours">
                           12
                         </span>
 
-                        <span class="dis-block t-center txt8">Hours</span>
+                        <span className="dis-block t-center txt8">Hours</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 minutes">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 minutes">
                           59
                         </span>
 
-                        <span class="dis-block t-center txt8">Minutes</span>
+                        <span className="dis-block t-center txt8">Minutes</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 seconds">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 seconds">
                           56
                         </span>
 
-                        <span class="dis-block t-center txt8">Seconds</span>
+                        <span className="dis-block t-center txt8">Seconds</span>
                       </div>
                     </div>
 
-                    <Link to="#" class="txt4 m-t-40">
+                    <Link to="#" className="txt4 m-t-40">
                       View Details
                       <i
-                        class="fa fa-long-arrow-right m-l-10"
+                        className="fa fa-long-arrow-right m-l-10"
                         aria-hidden="true"
                       ></i>
                     </Link>
@@ -89,81 +92,81 @@ const EventSection = () => {
           </div>
 
           <div
-            class="item-slick2 item2-slick2"
-            style="background-image: url(images/bg-event-02.jpg);"
+            className="item-slick2 item2-slick2"
+            style={{ backgroundImage: `url(${getImage('bg-event-02.jpg')})` }}
           >
-            <div class="wrap-content-slide2 p-t-115 p-b-208">
-              <div class="container">
-                <div class="title-event t-center m-b-52">
-                  <span class="tit2 p-l-15 p-r-15">Upcomming</span>
+            <div className="wrap-content-slide2 p-t-115 p-b-208">
+              <div className="container">
+                <div className="title-event t-center m-b-52">
+                  <span className="tit2 p-l-15 p-r-15">Upcomming</span>
 
-                  <h3 class="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
+                  <h3 className="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
                 </div>
 
                 <div
-                  class="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
+                  className="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
                   data-appear="fadeInDown"
                 >
                   <Link
                     to="#"
-                    class="wrap-pic-blo2 bg2-blo2"
-                    style="background-image: url(images/event-06.jpg);"
+                    className="wrap-pic-blo2 bg2-blo2"
+                    style={{ backgroundImage: `url(${getImage('event-06.jpg')})` }}
                   >
-                    <div class="time-event size10 txt6 effect1">
-                      <span class="txt-effect1 flex-c-m">
+                    <div className="time-event size10 txt6 effect1">
+                      <span className="txt-effect1 flex-c-m">
                         08:00 PM Tuesday - 21 November 2018
                       </span>
                     </div>
                   </Link>
 
-                  <div class="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
-                    <h4 class="tit7 t-center m-b-10">
+                  <div className="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
+                    <h4 className="tit7 t-center m-b-10">
                       Wines during specific nights
                     </h4>
 
-                    <p class="t-center">
+                    <p className="t-center">
                       Donec quis lorem nulla. Nunc eu odio mi. Morbi nec
                       lobortis est. Sed fringilla, nunc sed imperdiet lacinia
                     </p>
 
-                    <div class="flex-sa-m flex-w w-full m-t-40">
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 days">
+                    <div className="flex-sa-m flex-w w-full m-t-40">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 days">
                           25
                         </span>
 
-                        <span class="dis-block t-center txt8">Days</span>
+                        <span className="dis-block t-center txt8">Days</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 hours">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 hours">
                           12
                         </span>
 
-                        <span class="dis-block t-center txt8">Hours</span>
+                        <span className="dis-block t-center txt8">Hours</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 minutes">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 minutes">
                           59
                         </span>
 
-                        <span class="dis-block t-center txt8">Minutes</span>
+                        <span className="dis-block t-center txt8">Minutes</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 seconds">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 seconds">
                           56
                         </span>
 
-                        <span class="dis-block t-center txt8">Seconds</span>
+                        <span className="dis-block t-center txt8">Seconds</span>
                       </div>
                     </div>
 
-                    <Link to="#" class="txt4 m-t-40">
+                    <Link to="#" className="txt4 m-t-40">
                       View Details
                       <i
-                        class="fa fa-long-arrow-right m-l-10"
+                        className="fa fa-long-arrow-right m-l-10"
                         aria-hidden="true"
                       ></i>
                     </Link>
@@ -174,81 +177,81 @@ const EventSection = () => {
           </div>
 
           <div
-            class="item-slick2 item3-slick2"
-            style="background-image: url(images/bg-event-04.jpg);"
+            className="item-slick2 item3-slick2"
+            style={{ backgroundImage: `url(${getImage('bg-event-04.jpg')})` }}
           >
-            <div class="wrap-content-slide2 p-t-115 p-b-208">
-              <div class="container">
-                <div class="title-event t-center m-b-52">
-                  <span class="tit2 p-l-15 p-r-15">Upcomming</span>
+            <div className="wrap-content-slide2 p-t-115 p-b-208">
+              <div className="container">
+                <div className="title-event t-center m-b-52">
+                  <span className="tit2 p-l-15 p-r-15">Upcomming</span>
 
-                  <h3 class="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
+                  <h3 className="tit6 t-center p-l-15 p-r-15 p-t-3">Events</h3>
                 </div>
 
                 <div
-                  class="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
+                  className="blo2 flex-w flex-str flex-col-c-m-lg animated visible-false"
                   data-appear="rotateInUpLeft"
                 >
                   <Link
                     to="#"
-                    class="wrap-pic-blo2 bg3-blo2"
-                    style="background-image: url(images/event-01.jpg);"
+                    className="wrap-pic-blo2 bg3-blo2"
+                    style={{ backgroundImage: `url(${getImage('event-01.jpg')})` }}
                   >
-                    <div class="time-event size10 txt6 effect1">
-                      <span class="txt-effect1 flex-c-m">
+                    <div className="time-event size10 txt6 effect1">
+                      <span className="txt-effect1 flex-c-m">
                         08:00 PM Tuesday - 21 November 2018
                       </span>
                     </div>
                   </Link>
 
-                  <div class="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
-                    <h4 class="tit7 t-center m-b-10">
+                  <div className="wrap-text-blo2 flex-col-c-m p-l-40 p-r-40 p-t-45 p-b-30">
+                    <h4 className="tit7 t-center m-b-10">
                       Wines during specific nights
                     </h4>
 
-                    <p class="t-center">
+                    <p className="t-center">
                       Donec quis lorem nulla. Nunc eu odio mi. Morbi nec
                       lobortis est. Sed fringilla, nunc sed imperdiet lacinia
                     </p>
 
-                    <div class="flex-sa-m flex-w w-full m-t-40">
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 days">
+                    <div className="flex-sa-m flex-w w-full m-t-40">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 days">
                           25
                         </span>
 
-                        <span class="dis-block t-center txt8">Days</span>
+                        <span className="dis-block t-center txt8">Days</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 hours">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 hours">
                           12
                         </span>
 
-                        <span class="dis-block t-center txt8">Hours</span>
+                        <span className="dis-block t-center txt8">Hours</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 minutes">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 minutes">
                           59
                         </span>
 
-                        <span class="dis-block t-center txt8">Minutes</span>
+                        <span className="dis-block t-center txt8">Minutes</span>
                       </div>
 
-                      <div class="size11 flex-col-c-m">
-                        <span class="dis-block t-center txt7 m-b-2 seconds">
+                      <div className="size11 flex-col-c-m">
+                        <span className="dis-block t-center txt7 m-b-2 seconds">
                           56
                         </span>
 
-                        <span class="dis-block t-center txt8">Seconds</span>
+                        <span className="dis-block t-center txt8">Seconds</span>
                       </div>
                     </div>
 
-                    <Link to="#" class="txt4 m-t-40">
+                    <Link to="#" className="txt4 m-t-40">
                       View Details
                       <i
-                        class="fa fa-long-arrow-right m-l-10"
+                        className="fa fa-long-arrow-right m-l-10"
                         aria-hidden="true"
                       ></i>
                     </Link>
@@ -259,9 +262,8 @@ const EventSection = () => {
           </div>
         </div>
 
-        <div class="wrap-slick2-dots"></div>
+        <div className="wrap-slick2-dots"></div>
       </div>
     </section>
   );
-};
-export default EventSection;
+}
