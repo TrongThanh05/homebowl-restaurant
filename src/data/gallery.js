@@ -13,4 +13,60 @@ const galleryThumbnails = [
   { full: getImage('photo-gallery-11.jpg'), thumb: getImage('photo-gallery-thumb-11.jpg') },
 ];
 
+export const galleryCategories = [
+  { label: 'All Photo', filter: '*' },
+  { label: 'Interior', filter: 'interior' },
+  { label: 'Food', filter: 'food' },
+  { label: 'Events', filter: 'events' },
+  { label: 'Vip guests', filter: 'guests' },
+];
+
+export const galleryItems = [
+  {
+    id: 1,
+    img: 'photo-gallery-13.jpg',
+    categories: ['events', 'guests'],
+  },
+  {
+    id: 2,
+    img: 'photo-gallery-14.jpg',
+    categories: ['food'],
+  },
+  {
+    id: 3,
+    img: 'photo-gallery-15.jpg',
+    categories: ['events'],
+  },
+  {
+    id: 4,
+    img: 'photo-gallery-16.jpg',
+    categories: ['food'],
+  },
+  {
+    id: 5,
+    img: 'photo-gallery-17.jpg',
+    categories: ['food'],
+  },
+  {
+    id: 6,
+    img: 'photo-gallery-18.jpg',
+    categories: ['interior', 'guests'],
+  },
+  {
+    id: 7,
+    img: 'photo-gallery-19.jpg',
+    categories: ['interior'],
+  },
+  {
+    id: 8,
+    img: 'photo-gallery-20.jpg',
+    categories: ['interior'],
+  },
+  {
+    id: 9,
+    img: 'photo-gallery-21.jpg',
+    categories: ['events'],
+  },
+];
+
 export { galleryThumbnails };

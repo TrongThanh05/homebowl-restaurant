@@ -1,3 +1,189 @@
+// src/pages/About.jsx
+import { useState } from 'react';
+import { getImage } from '../utils/images';
+import SignUpSection from '../components/common/SignUpSection';
+import VideoModal from '../components/common/VideoModal';
+
+const chefs = [
+  {
+    id: 1,
+    name: 'Peter Hart',
+    title: 'Chef',
+    desc: 'Donec porta eleifend mauris ut effici-tur. Quisque non velit vestibulum, lob-ortis mi eget, rhoncus nunc',
+    avatar: 'avatar-02.jpg',
+  },
+  {
+    id: 2,
+    name: 'Joyce Bowman',
+    title: 'Chef',
+    desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ultricies felis a sem tempus tempus.',
+    avatar: 'avatar-03.jpg',
+  },
+  {
+    id: 3,
+    name: 'Peter Hart',
+    title: 'Chef',
+    desc: 'Phasellus aliquam libero a nisi varius, vitae placerat sem aliquet. Ut at velit nec ipsum iaculis posuere quis in sapien',
+    avatar: 'avatar-05.jpg',
+  },
+];
+
 export default function About() {
-  return <></>;
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  return (
+    <>
+      {/* Title Page */}
+      <section
+        className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
+        style={{ backgroundImage: `url(${getImage('bg-title-page-03.jpg')})` }}
+      >
+        <h2 className="tit6 t-center">About Us</h2>
+      </section>
+
+      {/* Our Story */}
+      <section className="bg2-pattern p-t-116 p-b-110 t-center p-l-15 p-r-15">
+        <span className="tit2 t-center">Italian Restaurant</span>
+
+        <h3 className="tit3 t-center m-b-35 m-t-5">Our Story</h3>
+
+        <p className="t-center size32 m-l-r-auto">
+          Fusce at risus eget mi auctor pulvinar. Suspendisse maximus venenatis pretium.
+          Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus
+          mus. Aliquam purus purus, lacinia a scelerisque in, luctus vel felis. Donec odio
+          diam, dignissim a efficitur at, efficitur et est. Pellentesque semper est ut
+          pulvinar ullamcorper. Class aptent taciti sociosqu ad litora torquent per conubia
+          nostra, per inceptos himenaeos. Nulla et leo accumsan, egestas velit ac,
+          fringilla tortor. Sed varius justo sed luctus mattis.
+        </p>
+      </section>
+
+      {/* Video */}
+      <section
+        className="section-video parallax100"
+        style={{ backgroundImage: `url(${getImage('header-menu-01.jpg')})` }}
+      >
+        <div className="content-video t-center p-t-225 p-b-250">
+          <span className="tit2 p-l-15 p-r-15">Discover</span>
+
+          <h3 className="tit4 t-center p-l-15 p-r-15 p-t-3">Our Video</h3>
+
+          <button
+            type="button"
+            className="btn-play ab-center size16 hov-pointer m-l-r-auto m-t-43 m-b-33 border-0 bg-transparent"
+            data-toggle="modal"
+            data-target="#modal-video-01"
+            onClick={() => setIsVideoOpen(true)}
+            aria-label="Play video"
+          >
+            <div className="flex-c-m sizefull bo-cir bgwhite color1 hov1 trans-0-4">
+              <i className="fa fa-play fs-18 m-l-2" aria-hidden="true"></i>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      {/* Delicious & Romantic */}
+      <section className="bg1-pattern p-t-120 p-b-105">
+        <div className="container">
+          {/* Delicious */}
+          <div className="row">
+            <div className="col-md-6 p-t-45 p-b-30">
+              <div className="wrap-text-delicious t-center">
+                <span className="tit2 t-center">Delicious</span>
+
+                <h3 className="tit3 t-center m-b-35 m-t-5">RECIPES</h3>
+
+                <p className="t-center m-b-22 size3 m-l-r-auto">
+                  Donec quis lorem nulla. Nunc eu odio mi. Morbi nec lobortis est. Sed
+                  fringilla, nunc sed imperdiet lacinia, nisl ante egestas mi, ac
+                  facilisis ligula sem id neque.
+                </p>
+              </div>
+            </div>
+
+            <div className="col-md-6 p-b-30">
+              <div className="wrap-pic-delicious size2 bo-rad-10 hov-img-zoom m-l-r-auto">
+                <img src={getImage('our-story-01.jpg')} alt="IMG-OUR" />
+              </div>
+            </div>
+          </div>
+
+          {/* Romantic */}
+          <div className="row p-t-170">
+            <div className="col-md-6 p-b-30">
+              <div className="wrap-pic-romantic size2 bo-rad-10 hov-img-zoom m-l-r-auto">
+                <img src={getImage('our-story-02.jpg')} alt="IMG-OUR" />
+              </div>
+            </div>
+
+            <div className="col-md-6 p-t-45 p-b-30">
+              <div className="wrap-text-romantic t-center">
+                <span className="tit2 t-center">Romantic</span>
+
+                <h3 className="tit3 t-center m-b-35 m-t-5">Restaurant</h3>
+
+                <p className="t-center m-b-22 size3 m-l-r-auto">
+                  Fusce iaculis, quam quis volutpat cursus, tellus quam varius eros, in
+                  euismod lorem nisl in ante. Maecenas imperdiet vulputate dui sit amet
+                  vestibulum. Nulla quis suscipit nisl.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Banner */}
+      <div
+        className="parallax0 parallax100"
+        style={{ backgroundImage: `url(${getImage('bg-cover-video-02.jpg')})` }}
+      >
+        <div className="overlay0-parallax t-center size33"></div>
+      </div>
+
+      {/* Chef */}
+      <section className="section-chef bgwhite p-t-115 p-b-95">
+        <div className="container t-center">
+          <span className="tit2 t-center">Meet Our</span>
+
+          <h3 className="tit5 t-center m-b-50 m-t-5">Chef</h3>
+
+          <div className="row">
+            {chefs.map((chef) => (
+              <div key={chef.id} className="col-md-8 col-lg-4 m-l-r-auto p-b-30">
+                <div className="blo5 pos-relative p-t-60">
+                  <div className="pic-blo5 size14 bo4 wrap-cir-pic hov-img-zoom ab-c-t">
+                    <a href="#chef" onClick={(e) => e.preventDefault()}>
+                      <img src={getImage(chef.avatar)} alt="IMG-AVATAR" />
+                    </a>
+                  </div>
+
+                  <div className="text-blo5 size34 t-center bo-rad-10 bo7 p-t-90 p-l-35 p-r-35 p-b-30">
+                    <a
+                      href="#chef"
+                      onClick={(e) => e.preventDefault()}
+                      className="txt34 dis-block p-b-6"
+                    >
+                      {chef.name}
+                    </a>
+
+                    <span className="dis-block t-center txt35 p-b-25">{chef.title}</span>
+
+                    <p className="t-center">{chef.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Sign up */}
+      <SignUpSection />
+
+      {/* Video Modal */}
+      <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
+    </>
+  );
 }
