@@ -11,7 +11,7 @@ const links = [
   { to: '/Blog', label: 'Blog' },
   { to: '/Contact', label: 'Contact' },
 ];
-const Header = () => {
+const Header = ({ onOpenSidebar }) => {
   return (
     <header>
       <div className="wrap-menu-header gradient1 trans-0-4">
@@ -48,7 +48,12 @@ const Header = () => {
                 <i className="fa fa-twitter m-l-21" aria-hidden="true"></i>
               </a>
 
-              <button className="btn-show-sidebar m-l-33 trans-0-4"></button>
+              <button
+                type="button"
+                className="btn-show-sidebar m-l-33 trans-0-4"
+                onClick={onOpenSidebar}
+                aria-label="Open Sidebar"
+              />
             </div>
           </div>
         </div>

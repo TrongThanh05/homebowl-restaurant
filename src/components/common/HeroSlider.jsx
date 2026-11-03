@@ -85,11 +85,16 @@ export default function HeroSlider() {
     infinite: true,
     arrows: true,
     dots: true,
-    dotsClass: 'slick1-dots',
+    dotsClass: 'wrap-slick1-dots',
     pauseOnHover: false,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
-    appendDots: (dots) => <div className="wrap-slick1-dots">{dots}</div>,
+    appendDots: (dots) => (
+      <div className="wrap-slick1-dots">
+        <ul className="slick1-dots">{dots}</ul>
+      </div>
+    ),
+    customPaging: (i) => <button type="button" aria-label={`Slide ${i + 1}`} />,
     beforeChange: (_oldIndex, newIndex) => setCurrent(newIndex),
     afterChange: (index) => setCurrent(index),
   };

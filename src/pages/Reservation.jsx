@@ -3,48 +3,12 @@ import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import { getImage } from '../utils/images';
-
-const timeOptions = [
-  '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
-].map((time) => ({ value: time, label: time }));
-
-const peopleOptions = [
-  '1 person', '2 people', '3 people', '4 people',
-  '5 people', '6 people', '7 people', '8 people',
-  '9 people', '10 people', '11 people', '12 people',
-].map((people) => ({ value: people, label: people }));
-
-const selectCustomStyles = {
-  control: (provided) => ({
-    ...provided,
-    height: '100%',
-    minHeight: '46px',
-    border: 'none',
-    boxShadow: 'none',
-    borderRadius: '10px',
-    backgroundColor: '#fff',
-    fontSize: '14px',
-    cursor: 'pointer',
-    paddingLeft: '6px',
-  }),
-  indicatorSeparator: () => ({ display: 'none' }),
-  dropdownIndicator: (provided) => ({
-    ...provided,
-    color: '#666',
-    paddingRight: '15px',
-  }),
-  valueContainer: (provided) => ({
-    ...provided,
-    padding: '0 8px',
-  }),
-  menu: (provided) => ({
-    ...provided,
-    borderRadius: '10px',
-    zIndex: 99,
-  }),
-};
+import {
+  timeOptions,
+  peopleOptions,
+  selectCustomStyles,
+  renderCustomDatePickerHeader,
+} from '../utils/reservationConstants';
 
 export default function Reservation() {
   const [startDate, setStartDate] = useState(new Date());
@@ -106,6 +70,7 @@ export default function Reservation() {
                         onChange={(date) => setStartDate(date)}
                         className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                         dateFormat="dd/MM/yyyy"
+                        renderCustomHeader={renderCustomDatePickerHeader}
                       />
                       <i
                         className="btn-calendar fa fa-calendar ab-r-m hov-pointer m-r-18"

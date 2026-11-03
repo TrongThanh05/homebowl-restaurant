@@ -14,7 +14,7 @@ export default function Blog() {
   const [activePage, setActivePage] = useState(1);
 
   const filteredPosts = blogPosts.filter((post) =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -85,7 +85,10 @@ export default function Blog() {
 
                       <p>{post.excerpt}</p>
 
-                      <Link to={`/Blog/${post.id}`} className="dis-block txt4 m-t-30">
+                      <Link
+                        to={`/Blog/${post.id}`}
+                        className="dis-block txt4 m-t-30"
+                      >
                         Continue Reading
                         <i
                           className="fa fa-long-arrow-right m-l-10"
