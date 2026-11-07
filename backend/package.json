@@ -1,0 +1,20 @@
+{
+  "name": "homebowl-backend",
+  "version": "1.0.0",
+  "description": "Backend API for HomeBowl Restaurant Management",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --env-file=.env --watch src/server.js",
+    "test": "node --env-file=.env.example --test tests/app.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mssql": "^11.0.1"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  }
+}
