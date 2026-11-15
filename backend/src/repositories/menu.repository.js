@@ -80,12 +80,15 @@ export async function listItems(categoryId, page, pageSize) {
     .query(`
       SELECT mi.id, mi.category_id, mi.name, mi.description, mi.price,
              mi.image_url, mi.is_available, mi.created_at,
-             mc.name AS category_name
+             mc.name AS category_name,
+             wmi.section,
+             COALESCE(wmi.sort_order, 999) AS sort_order
       FROM menu_items mi
       JOIN menu_categories mc ON mc.id = mi.category_id
+      LEFT JOIN website_menu_items wmi ON wmi.menu_item_id = mi.id
       WHERE (@categoryId IS NULL OR mi.category_id = @categoryId)
         AND mi.is_available = 1
-      ORDER BY mi.created_at DESC
+      ORDER BY COALESCE(wmi.sort_order, 999) ASC, mi.created_at DESC
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
     `);
   return result.recordset;
@@ -109,9 +112,10 @@ export async function findItemById(id) {
   const result = await pool.request()
     .input('id', sql.Int, id)
     .query(`
-      SELECT mi.*, mc.name AS category_name
+      SELECT mi.*, mc.name AS category_name, wmi.section
       FROM menu_items mi
       JOIN menu_categories mc ON mc.id = mi.category_id
+      LEFT JOIN website_menu_items wmi ON wmi.menu_item_id = mi.id
       WHERE mi.id = @id
     `);
   return result.recordset[0] || null;

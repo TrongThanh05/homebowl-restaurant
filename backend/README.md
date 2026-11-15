@@ -59,31 +59,17 @@ backend/
 
 ---
 
-## 3. Danh sách 15 Module đã hoàn thành
+## 3. Phân định rõ trách nhiệm (Single Responsibility Principle)
 
-| Module | Bảng CSDL / View liên quan | Mục đích & Chức năng | Phân quyền truy cập |
-| :--- | :--- | :--- | :--- |
-| **`health`** | Test Query `SELECT 1` | Kiểm tra tình trạng sống của API và kết nối CSDL | Công khai (`GET /api/health`) |
-| **`auth`** | `users`, `roles` | Đăng ký, đăng nhập tài khoản khách/nhân viên, lấy profile hiện tại | Công khai / Người dùng có token |
-| **`menu`** | `menu_categories`, `menu_items` | Danh mục món ăn, danh sách món (lọc theo danh mục, phân trang), cập nhật trạng thái còn/hết món | Đọc: Công khai<br>Ghi: `MANAGER`, `ADMIN` |
-| **`tables`** | `dining_tables` | Danh sách bàn ăn, trạng thái bàn (`AVAILABLE`, `OCCUPIED`, `RESERVED`, `OUT_OF_SERVICE`) | `WAITER`, `MANAGER`, `ADMIN` |
-| **`reservations`** | `reservations`, `customers` | Khách hàng đặt bàn trực tuyến, nhân viên duyệt/xác nhận/hủy bàn | Tạo: Công khai<br>Quản lý: `WAITER`, `MANAGER`, `ADMIN` |
-| **`orders`** | `orders`, `order_items`, `dining_tables` | Mở đơn hàng tại bàn, thêm món vào đơn, cập nhật trạng thái chế biến (`NEW` → `COOKING` → `READY` → `SERVED`) | `WAITER`, `CHEF`, `CASHIER`, `MANAGER`, `ADMIN` |
-| **`payments`** | `payments`, view `vw_order_totals` | Tính tiền đơn hàng, ghi nhận thanh toán (`CASH`, `CARD`, `TRANSFER`, `E_WALLET`), đóng đơn `PAID` | `CASHIER`, `MANAGER`, `ADMIN` |
-| **`employees`** | `employees`, `users`, `roles` | Quản lý danh sách nhân viên, thông tin chức vụ, vô hiệu hóa tài khoản (soft delete) | `MANAGER`, `ADMIN` |
-| **`inventory`** | `suppliers`, `ingredients`, `stock_movements`, view `vw_ingredient_stock` | Quản lý nhà cung cấp, nguyên liệu tồn kho, cảnh báo thiếu hụt (`low-stock`), ghi nhận xuất/nhập kho | `CHEF`, `MANAGER`, `ADMIN` |
-| **`reviews`** | `reviews`, `customers` | Khách gửi đánh giá/rating (1-5 sao), hiển thị đánh giá đã duyệt lên trang chủ, quản lý phê duyệt | Gửi & đọc đã duyệt: Công khai<br>Duyệt: `MANAGER`, `ADMIN` |
-| **`newsletter`** | `newsletter_subscribers` | Khách đăng ký nhận tin tức qua email, hủy đăng ký, danh sách subscriber | Đăng ký: Công khai<br>Xem: `MANAGER`, `ADMIN` |
-| **`blog`** | `blog_posts`, `blog_categories`, `blog_post_categories`, `blog_comments` | Bài viết ẩm thực/tin tức, lọc bài theo slug danh mục, bài đọc nhiều nhất, lưu trữ theo tháng, bình luận bài viết | Đọc & bình luận: Công khai<br>Duyệt bài/bình luận: `MANAGER`, `ADMIN` |
-| **`gallery`** | `gallery_images` | Quản lý danh sách hình ảnh bộ sưu tập hiển thị trên trang Gallery và Footer | Đọc: Công khai<br>Ghi: `MANAGER`, `ADMIN` |
-| **`settings`** | `site_settings` | Cấu hình website (tên nhà hàng, giờ mở cửa, địa chỉ, hotline, mạng xã hội) | Đọc: Công khai<br>Sửa: `ADMIN` |
-| **`reports`** | `payments`, `orders`, `order_items` | Báo cáo doanh thu theo ngày, thống kê các món ăn bán chạy nhất | `MANAGER`, `ADMIN` |
-
----
+Tầng | Vai trò | Trách nhiệm chính | Điều nó KHÔNG được biết
+Controller Tiếp tân / Bồi bàn Nhận request HTTP (params, body), gọi Service, trả response JSON. Không biết logic tính toán, không biết SQL.
+Service Đầu bếp trưởng Xử lý nghiệp vụ (tính tiền, check điều kiện, phân quyền, gửi mail, điều phối transaction). Không biết req, res HTTP; không quan tâm câu lệnh SQL viết như thế nào.
+Repository Thủ kho Chỉ làm việc với CSDL (chạy lệnh SELECT, INSERT, UPDATE có tham số hóa). Không quan tâm dữ liệu dùng để làm gì, không quyết định đúng/sai về mặt kinh doanh.
 
 ## 4. Quy ước Hợp đồng API
 
 ### 4.1. Tiền tố & Đường dẫn
+
 - Tiền tố chung: `/api`
 - Danh từ số nhiều, viết thường: `/api/menu-items`, `/api/blog-posts`, `/api/dining-tables`
 - Tài nguyên con / Hành động trạng thái:
@@ -92,6 +78,7 @@ backend/
   - `PATCH /api/reviews/:id/publish`: Phê duyệt hiển thị đánh giá
 
 ### 4.2. Định dạng phản hồi chuẩn
+
 - **Thành công (200 / 201):**
   ```json
   {
@@ -127,11 +114,14 @@ backend/
 ## 5. Hướng dẫn cài đặt & Chạy ứng dụng
 
 ### 5.1. Yêu cầu môi trường
+
 - **Node.js:** Phiên bản ≥ **20.6.0** (hỗ trợ cờ `--env-file`).
 - **SQL Server:** Đã chạy khởi tạo cơ sở dữ liệu `RestaurantDB` từ file script `restaurant_db.sql`.
 
 ### 5.2. Cấu hình biến môi trường
+
 Tạo file `.env` từ `.env.example`:
+
 ```bash
 cp .env.example .env
 # Hoặc trên Windows PowerShell:
@@ -139,6 +129,7 @@ copy .env.example .env
 ```
 
 Nội dung cấu hình mẫu trong `.env`:
+
 ```env
 PORT=3000
 CORS_ORIGINS=http://localhost:5173
@@ -155,18 +146,23 @@ MAX_BODY_BYTES=102400
 ```
 
 ### 5.3. Cài đặt thư viện
+
 ```bash
 npm install
 ```
 
 ### 5.4. Chạy kiểm thử (Unit Testing)
+
 Dự án sử dụng test runner chuẩn tích hợp sẵn trong Node.js (`node:test` và `node:assert`):
+
 ```bash
 npm test
 ```
-*Kết quả:* Kiểm thử thành công 100% các thành phần định tuyến, middleware bảo mật, phản hồi HTTP chuẩn hóa và xử lý mã lỗi 404.
+
+_Kết quả:_ Kiểm thử thành công 100% các thành phần định tuyến, middleware bảo mật, phản hồi HTTP chuẩn hóa và xử lý mã lỗi 404.
 
 ### 5.5. Khởi động máy chủ
+
 - **Chế độ phát triển (Tự động tải lại khi code thay đổi):**
   ```bash
   npm run dev
@@ -175,5 +171,6 @@ npm test
   ```bash
   npm start
   ```
+
 API sẽ lắng nghe tại: `http://localhost:3000/api`
 Kiểm tra nhanh: `http://localhost:3000/api/health`
