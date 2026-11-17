@@ -31,8 +31,9 @@ async function findOrCreateCustomer(body) {
 export async function listPublished(query) {
   const page = Math.max(1, parseInt(query.page || '1', 10));
   const pageSize = Math.min(100, Math.max(1, parseInt(query.pageSize || '10', 10)));
+  const lang = query.lang || 'vi';
   const [items, total] = await Promise.all([
-    reviewsRepo.listPublished(page, pageSize),
+    reviewsRepo.listPublished(page, pageSize, lang),
     reviewsRepo.countPublished(),
   ]);
   return { items, meta: { page, pageSize, total } };
