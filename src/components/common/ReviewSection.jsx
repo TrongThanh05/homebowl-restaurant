@@ -1,12 +1,14 @@
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 
 const ReviewSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="section-review p-t-115">
       <div className="title-review t-center m-b-2">
-        <span className="tit2 p-l-15 p-r-15">Customers Say</span>
+        <span className="tit2 p-l-15 p-r-15">{t('reviews.subtitle')}</span>
 
-        <h3 className="tit8 t-center p-l-20 p-r-15 p-t-3">Review</h3>
+        <h3 className="tit8 t-center p-l-20 p-r-15 p-t-3">{t('reviews.title')}</h3>
       </div>
       <div className="wrap-slick3">
         <div className="slick3">
@@ -25,9 +27,9 @@ const ReviewSection = () => {
                   data-appear="fadeInUp"
                 >
                   <p className="t-center txt12 size15 m-l-r-auto">
-                    " We are lorem ipsum dolor sit amet, consectetur adipiscing
+                    &quot; We are lorem ipsum dolor sit amet, consectetur adipiscing
                     elit. Aenean tellus sem, mattis in pre-tium nec, fermentum
-                    viverra dui "
+                    viverra dui &quot;
                   </p>
 
                   <div className="star-review fs-18 color0 flex-c-m m-t-12">
@@ -64,9 +66,9 @@ const ReviewSection = () => {
                   data-appear="fadeInUp"
                 >
                   <p className="t-center txt12 size15 m-l-r-auto">
-                    " We are lorem ipsum dolor sit amet, consectetur adipiscing
+                    &quot; We are lorem ipsum dolor sit amet, consectetur adipiscing
                     elit. Aenean tellus sem, mattis in pre-tium nec, fermentum
-                    viverra dui "
+                    viverra dui &quot;
                   </p>
 
                   <div className="star-review fs-18 color0 flex-c-m m-t-12">
@@ -103,9 +105,9 @@ const ReviewSection = () => {
                   data-appear="fadeInUp"
                 >
                   <p className="t-center txt12 size15 m-l-r-auto">
-                    " We are lorem ipsum dolor sit amet, consectetur adipiscing
+                    &quot; We are lorem ipsum dolor sit amet, consectetur adipiscing
                     elit. Aenean tellus sem, mattis in pre-tium nec, fermentum
-                    viverra dui "
+                    viverra dui &quot;
                   </p>
 
                   <div className="star-review fs-18 color0 flex-c-m m-t-12">

@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 
 const BlogSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="section-blog bg-white p-t-115 p-b-123">
       <div className="container">
         <div className="title-section-ourmenu t-center m-b-22">
-          <span className="tit2 t-center">Latest News</span>
+          <span className="tit2 t-center">{t('blogSection.subtitle')}</span>
 
-          <h3 className="tit5 t-center m-t-2">The Blog</h3>
+          <h3 className="tit5 t-center m-t-2">{t('blogSection.title')}</h3>
         </div>
 
         <div className="row">
@@ -35,7 +37,7 @@ const BlogSection = () => {
                 </p>
 
                 <Link to="/BlogDetail" className="txt4">
-                  Continue Reading
+                  {t('common.readMore')}
                   <i
                     className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"
@@ -68,7 +70,7 @@ const BlogSection = () => {
                 </p>
 
                 <Link to="/BlogDetail" className="txt4">
-                  Continue Reading
+                  {t('common.readMore')}
                   <i
                     className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"
@@ -101,7 +103,7 @@ const BlogSection = () => {
                 </p>
 
                 <Link to="/BlogDetail" className="txt4">
-                  Continue Reading
+                  {t('common.readMore')}
                   <i
                     className="fa fa-long-arrow-right m-l-10"
                     aria-hidden="true"

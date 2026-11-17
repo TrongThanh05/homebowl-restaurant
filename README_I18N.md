@@ -1,218 +1,369 @@
-# README_I18N — Kế hoạch đa ngôn ngữ (Việt ↔ Anh) cho Homebowl Restaurant
+## 0. Yêu cầu (chỉ gồm hai việc)
 
-> Tài liệu này dành cho **AI agent** (hoặc lập trình viên) tự thực hiện từng bước.
-> Đọc hết mục 0–3 trước khi sửa bất kỳ file nào. Làm **tuần tự**, mỗi bước xong phải
-> chạy kiểm tra (mục 2.4) và commit riêng.
+**A. Giao diện:** thêm **một ô chọn (`<select>`) Tiếng Việt / English**. Mọi chữ cố định của giao diện
+(menu điều hướng, tiêu đề section, nhãn form, nút, thông báo) lấy từ các biến trong
+`src/i18n/locales/vi.json` và `en.json` qua hàm `t('key')`.
 
----
+**B. Dữ liệu từ database:** tạo **script SQL** theo phương thức **bảng dịch riêng cho từng thực thể**
+(mỗi bảng gốc có đúng một bảng `*_translations`), và cho backend nhận tham số `?lang=` để trả đúng ngôn ngữ.
 
-## 0. Mục tiêu và phạm vi
+**Quy tắc phân định (áp dụng xuyên suốt):**
 
-Website nhà hàng hiện hiển thị hoàn toàn tiếng Anh
-**chuyển linh hoạt Việt ↔ Anh** bằng nút `VI | EN`, không tải lại trang.
+| Nội dung                                              | Nơi lưu               | Ví dụ                                                    |
+| ----------------------------------------------------- | --------------------- | -------------------------------------------------------- |
+| Chữ cố định của giao diện                             | JSON (`t('key')`)     | "Đặt bàn", "Đang tải...", nhãn form, tiêu đề section     |
+| Nội dung nhân viên nhà hàng nhập/sửa, đã nằm trong DB | Bảng `*_translations` | tên món, bài blog, sự kiện, giới thiệu                   |
+| Nội dung khách nhập                                   | **Không dịch**        | `reviews.content`, `blog_comments.content`, tên, ghi chú |
+| Dữ liệu lịch sử, mã nội bộ                            | **Không dịch**        | đơn hàng, hóa đơn, `status`, `role`                      |
 
-Có **hai loại nội dung**, xử lý khác nhau:
-
-| Loại                       | Ví dụ                                                           | Nguồn                                 | Cơ chế                                                     |
-| -------------------------- | --------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------- |
-| **A. Giao diện (UI)**      | Menu điều hướng, nhãn form, nút, tiêu đề section, thông báo lỗi | `src/i18n/locales/vi.json`, `en.json` | Hàm `t('key')`                                             |
-| **B. Nội dung động từ DB** | Tên danh mục, tên và mô tả món ăn, (sau này) blog, sự kiện      | SQL Server                            | Bảng dịch riêng cho từng thực thể + tham số `?lang=` ở API |
-
-**Không dịch:**
-
-- Dữ liệu khách tự nhập (họ tên, ghi chú, bình luận, nội dung `reviews`).
-- Dữ liệu lịch sử: đơn hàng, hóa đơn (giữ nguyên như lúc tạo).
-- Mã nội bộ: tên role, mã trạng thái (`OPEN`, `SERVING`...). Frontend ánh xạ mã → chữ bằng file JSON.
-- Thông tin cố định của nhà hàng (địa chỉ, số điện thoại, email, giờ mở cửa) → để trong
-  `src/config/siteInfo.js`, không đưa vào JSON bản dịch (chỉ nhãn như "Mỗi ngày" mới dịch).
-
-**Tiền tệ:** giá luôn lưu bằng **VND**. Đổi sang English chỉ đổi cách hiển thị, **không quy đổi USD**.
+**Tiền tệ:** giá luôn lưu VND. Đổi sang English chỉ đổi cách hiển thị, **không quy đổi USD**.
 
 ---
 
-## 1. Ràng buộc bắt buộc (không được vi phạm)
+## 1. Ràng buộc bắt buộc
 
-1. **Không đổi stack.** Frontend: React 19 + Vite + `react-router-dom` + Bootstrap. Backend: **vanilla Node.js**
-   (module `http`, `url`, `fs`, `path`, `crypto`). **Cấm** Express, NestJS, Fastify, Koa.
-2. **Database là Microsoft SQL Server**, driver `mssql`. Mọi truy vấn dùng **tham số** (`.input(...)`),
-   tuyệt đối không nối chuỗi người dùng vào SQL.
-3. **Không sửa, xóa, truncate dữ liệu hiện có.** Chỉ thêm bảng mới. Mọi migration phải:
-   idempotent (`IF OBJECT_ID(...) IS NULL`) và có đoạn ROLLBACK trong comment.
-4. **Không bịa file, bảng, API, cột không tồn tại.** Trước khi viết SQL phải đọc lại `restaurant_db.sql`.
-5. **Không thêm dependency** nếu không cần. Frontend dùng `fetch` nếu `axios` chưa có trong `package.json`.
-6. **Không tuyên bố test/build đã pass nếu chưa chạy.** Báo cáo kết quả thật.
-7. **Không đưa secret** (mật khẩu DB, khóa) vào frontend, Git hay log. Dùng `.env`, commit `.env.example`.
-8. **Không dùng `localStorage` để lưu dữ liệu nhạy cảm**; chỉ lưu lựa chọn ngôn ngữ (`app_lang`).
+1. Giữ nguyên stack: React 19 + Vite + `react-router-dom` + Bootstrap 4; backend **Node.js thuần** (không Express/NestJS/Fastify/Koa); SQL Server + `mssql`.
+2. Mọi truy vấn SQL dùng tham số `.input(...)`. **Không nối chuỗi từ dữ liệu người dùng** vào SQL.
+3. **Không sửa/xóa/truncate dữ liệu hiện có.** Chỉ thêm bảng mới. Mọi script phải chạy lại được nhiều lần (`IF OBJECT_ID(...) IS NULL`) và có script rollback.
+4. Không bịa file, bảng, API. Trước khi viết SQL phải đọc lại `restaurant_db.sql`.
+5. Không thêm dependency nếu không cần (frontend đã có `axios`).
+6. Không tuyên bố build/test/lint "đã pass" nếu chưa chạy. Báo kết quả thật.
+7. Không đưa secret vào frontend hoặc Git.
+8. `GET` không có `?lang=` phải **giữ nguyên hành vi hiện tại** (trả tiếng Việt) để không phá chức năng đang chạy.
 
 ---
 
-## 2. Bối cảnh dự án hiện tại
+## 2. Hiện trạng
 
-### 2.1. Cấu trúc dự án đã tách biệt rõ backend và frontend
+### 2.1. Những gì có và chưa có
 
-### 2.2. Đã hoàn thành (Giai đoạn 1.1) — không làm lại
+- **Backend đã tồn tại** (`backend/`, Node thuần, 4 tầng routes → controllers → services → repositories). Phản hồi thành công có dạng `{ "success": true, "data": ... }`;
+  lỗi có dạng `{ "success": false, "error": { "code", "message" } }` (`message` tiếng Việt, `code` ổn định).
+- **API menu thật:** `GET /api/menu-items?page&pageSize&categoryId` và `GET /api/menu-categories`
+  (không có `/api/menu`). Mỗi món trả về cả `category_name` và `section`
+  (`starters|drinks|desserts|mains|lunch|dinner`, lấy từ bảng `website_menu_items`).
+- **Frontend mới chỉ nối API cho trang Menu** (`src/services/menuService.js`, dùng `axios`, `VITE_API_URL` mặc định `http://localhost:3000/api`).
+  Blog, sự kiện, gallery, đánh giá vẫn dùng `src/data/*.js`.
+- **`src/i18n/` và hai file `vi.json`/`en.json` CHƯA nằm trong repo** (commit chỉ có `README_I18N.md`). Phải tạo ở Bước A1 (mã nguồn ở mục 3; hai file JSON đính kèm cùng README này, **130 key**).
+- Bảng DB có nội dung hiển thị (theo `restaurant_db.sql`): `menu_categories(name)`, `menu_items(name, description)`,
+  `site_settings(setting_key, setting_value)`, `blog_categories(name)`, `blog_posts(title, excerpt, content, tags)`,
+  `events(title, description)`, `gallery_images(title)`, `gallery_categories(name)`, `dining_tables(area)`, `blog_popular_posts(title)`.
+- **Backend chưa có route cho `events`.** Bảng `blog_popular_posts` hiện **không được backend dùng** (`/blog-posts/most-viewed` đọc từ `blog_posts`).
 
-- `src/i18n/languageContext.js` — `LanguageContext` + hook `useLanguage()` (tách file để tránh cảnh báo `react-refresh`).
-- `src/i18n/LanguageProvider.jsx` — state `lang` (`vi` mặc định), lưu `localStorage['app_lang']`, set `document.documentElement.lang`, hàm `t(key, params)`
-  (fallback: ngôn ngữ hiện tại → tiếng Việt → chính key; nội suy `{name}`).
-- `src/i18n/LanguageSwitcher.jsx` — nút `VI | EN` (Bootstrap).
-- `src/i18n/format.js` — `pickText(field, lang)`, `formatPrice(value, lang)`, `formatDate(iso, lang)`.
-- `src/i18n/locales/vi.json`, `en.json` — **119 key**, hai file có cùng bộ key và cùng placeholder.
-- `main.jsx` đã bọc `LanguageProvider`; `Header.jsx` đã dùng `t()` + `LanguageSwitcher`; `pages/Menu.jsx` đã dùng `t()`, `pickText`, `formatPrice`.
-- `App.jsx`: đã sửa import `layout` → `Layout` (lỗi hoa/thường khi build trên Linux).
-- `src/data/menu.js`: giá đổi từ chuỗi `'$29.79'` sang **số** (giá trị tạm, ví dụ `29790`) — **cần thay bằng giá VND thật**.
+### 2.2. Lỗi nền phải sửa trước (Bước 0) — không liên quan i18n nhưng chặn việc kiểm tra
 
-`npm run lint` và `vite build` đã chạy thành công ở trạng thái này. Chưa kiểm thử bằng trình duyệt.
+| #   | Lỗi                                                                                                                                                                                                                           | Cách sửa                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | `npx vite build` **thất bại trên Linux/CI**: `src/App.jsx` import `'./components/layout/layout'` nhưng file là `Layout.jsx` (chạy được trên Windows/macOS vì không phân biệt hoa thường)                                      | Đổi thành `'./components/layout/Layout'`. Đã thử: sau khi sửa, build thành công                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2   | `npm run lint` báo ~27 lỗi vì ESLint gốc áp quy tắc **trình duyệt** lên `backend/` (không biết `process`...)                                                                                                                  | Trong `eslint.config.js`: giới hạn khối hiện tại cho `files: ['src/**/*.{js,jsx}']` và thêm khối `{ files: ['backend/**/*.js', '*.config.js'], extends: [js.configs.recommended], languageOptions: { globals: globals.node } }` trước `prettier`. Đã thử: còn 7 lỗi `no-unused-vars` thật (`menu.controller.js` import `parse`, `auth.js` biến `err`, `orders.service.js` import `listEmployees`, 4 chỗ trong `tests/app.test.js`) — xóa import/biến thừa, **không đổi logic** |
+| 3   | `backend/package.json` có `"test": "node --env-file=.env.example ..."` nhưng **`backend/.env.example` không có trong repo** (README nói có) → `npm test` lỗi. Test thứ 3 (CORS) cũng cần `CORS_ORIGINS=http://localhost:5173` | Tạo `backend/.env.example` chỉ chứa giá trị giả: `PORT=3000`, `CORS_ORIGINS=http://localhost:5173`, `DB_SERVER=localhost`, `DB_PORT=1433`, `DB_NAME=RestaurantDB`, `DB_USER=sa`, `DB_PASSWORD=change_me`, `DB_ENCRYPT=false`, `DB_TRUST_SERVER_CERT=true`, `JWT_SECRET=change_me`, `JWT_EXPIRES_IN=8h`, `MAX_BODY_BYTES=102400`. Đã thử: với `CORS_ORIGINS` đặt đúng, 5/5 test pass                                                                                            |
 
-### 2.3. Quy ước bắt buộc khi viết code i18n
+Commit riêng: `chore: fix build case, lint scope, backend .env.example`.
 
-- **Tên key:** `nhóm.tênKey` bằng camelCase, ví dụ `booking.submit`, `blog.comments.one`.
-- **Mọi key mới phải thêm vào cả `vi.json` và `en.json`**, cùng placeholder. Không để một file thiếu key.
-- **Số nhiều:** `t()` không hỗ trợ plural. Dùng cặp `.one` / `.other` và chọn trong component:
-  ```jsx
-  t(count === 1 ? 'blog.comments.one' : 'blog.comments.other', { count });
+### 2.3. Kiểm tra bắt buộc sau mỗi bước
+
+```bash
+npm run lint && npx vite build          # tại thư mục gốc (frontend)
+cd backend && npm test                  # sau khi có .env.example; thêm test mới vào tests/
+```
+
+Kiểm tra thủ công bằng `npm run dev` (frontend) + `npm run dev` trong `backend/`: đổi ngôn ngữ, tải lại trang, xem lại lựa chọn được nhớ.
+
+### 2.4. Quy ước i18n
+
+- Key dạng `nhóm.tênKey` (camelCase). **Mọi key mới phải thêm vào cả `vi.json` và `en.json`**, cùng placeholder (`{count}`, `{year}`, `{n}`).
+- Số nhiều dùng cặp `.one` / `.other`, chọn trong component: `t(count === 1 ? 'blog.comments.one' : 'blog.comments.other', { count })`.
+- Không để chuỗi hiển thị trong file hằng/`utils`; lưu key hoặc giá trị thô, tạo nhãn bằng `t()` trong component.
+- `alt`, `aria-label`, `title`, `placeholder` cũng đi qua `t()`.
+- Tên thương hiệu và dữ liệu liên hệ (địa chỉ, điện thoại, email) **không** nằm trong JSON.
+- Script kiểm tra đồng bộ key (chạy sau mỗi lần sửa JSON):
+  ```bash
+  node -e "const v=require('./src/i18n/locales/vi.json'),e=require('./src/i18n/locales/en.json');
+  const a=Object.keys(v).filter(k=>!(k in e)),b=Object.keys(e).filter(k=>!(k in v));
+  console.log({thieuTrongEn:a,thieuTrongVi:b});process.exit(a.length||b.length?1:0)"
   ```
-- **Không để chuỗi hiển thị trong file hằng/`utils`.** Lưu _key_ hoặc _giá trị số_, tạo nhãn bằng `t()` trong component
-  (dùng `useMemo` nếu danh sách lớn).
-- **Dữ liệu tĩnh đa ngôn ngữ:** trường chữ có thể là chuỗi hoặc `{ vi: '...', en: '...' }`; luôn đọc qua `pickText(field, lang)`.
-- **Giá:** lưu số (VND), hiển thị bằng `formatPrice(value, lang)`. **Ngày:** lưu ISO `YYYY-MM-DD`, hiển thị bằng `formatDate`.
-- **Thuộc tính truy cập:** `alt`, `aria-label`, `title`, `placeholder` cũng phải đi qua `t()`.
-- **Tên thương hiệu** (`brand.name`) và địa chỉ/điện thoại không dịch.
-
-### 2.4. Kiểm tra bắt buộc sau mỗi bước
-
-```bash
-npm run lint
-npx vite build
-```
-
-Cả hai phải thành công. Ngoài ra kiểm tra thủ công bằng `npm run dev`: bấm `VI`/`EN`, xem trang vừa sửa ở cả hai ngôn ngữ,
-và tải lại trang để chắc ngôn ngữ được nhớ.
-
-Script kiểm tra đồng bộ key (chạy sau khi sửa JSON):
-
-```bash
-node -e "const v=require('./src/i18n/locales/vi.json'),e=require('./src/i18n/locales/en.json');
-const a=Object.keys(v).filter(k=>!(k in e)),b=Object.keys(e).filter(k=>!(k in v));
-console.log({thieuTrongEn:a,thieuTrongVi:b}); process.exit(a.length||b.length?1:0)"
-```
+  (Dự án đặt `"type": "module"` nên nếu `require` lỗi, đổi sang `JSON.parse(fs.readFileSync(...))`.)
 
 ---
 
-## 3. GIAI ĐOẠN 1 — Chuyển toàn bộ giao diện sang `t()` (frontend thuần)
+## 3. PHẦN A — Giao diện: ô chọn ngôn ngữ + file JSON
 
-Mỗi bước: sửa → chạy mục 2.4 → kiểm tra thủ công hai ngôn ngữ → commit
-(`feat(i18n): <tên bước>`). **Không refactor ngoài phạm vi** (không đổi class, bố cục, thư viện).
+### Bước A1 — Nền tảng i18n (tạo mới `src/i18n/`)
 
-### Bước 1.2 — Layout: Footer, Sidebar, SignUpSection
+```text
+src/i18n/
+├── languageContext.js     # createContext + hook useLanguage + SUPPORTED_LANGS
+├── LanguageProvider.jsx   # state lang, t(), lưu localStorage
+├── LanguageSelect.jsx     # <select> chọn ngôn ngữ
+├── format.js              # pickText, formatPrice, formatDate
+└── locales/{vi.json,en.json}   # copy hai file đính kèm (130 key)
+```
 
-| File                       | Chữ cứng → key                                                                                                                                                                                                                                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `layout/Footer.jsx`        | "Contact Us" → `footer.contactUs`; "Opening Times" → `footer.openingTimes`; "Every Day" → `common.everyDay`; "Latest twitter" → `footer.latestTwitter`; "Gallery" → `footer.gallery`; dòng copyright → `footer.copyright` với `{ year: new Date().getFullYear() }`; `alt="GALLERY"` → `footer.gallery` |
-| `common/Sidebar.jsx`       | Link điều hướng → `nav.*`; `aria-label="Close Sidebar"` → `common.closeSidebar`; "Gallery" → `footer.gallery`                                                                                                                                                                                          |
-| `layout/Header.jsx`        | `aria-label="Open Sidebar"` → `common.openSidebar` (phần điều hướng đã xong)                                                                                                                                                                                                                           |
-| `common/SignUpSection.jsx` | "Specials Sign up" → `signup.title`; "Sign-up" → `signup.button`; placeholder → `signup.placeholder`                                                                                                                                                                                                   |
+Tách hook và hằng khỏi file provider để không vi phạm `react-refresh/only-export-components`.
 
-Địa chỉ, điện thoại, email, giờ mở cửa: chuyển sang `src/config/siteInfo.js` (export object), Footer và Contact import từ đó.
-Các câu "Latest twitter" là nội dung mẫu của template — chỉ dịch nhãn, **không** dịch nội dung tweet; hỏi chủ dự án có giữ khối này không.
+**`languageContext.js`**
 
-**Hoàn thành khi:** Footer và Sidebar đổi ngôn ngữ đúng; không còn chữ tiếng Anh cứng trong các file này.
+```js
+import { createContext, useContext } from 'react';
 
-### Bước 1.3 — Các section trang chủ
+export const SUPPORTED_LANGS = ['vi', 'en'];
+export const LanguageContext = createContext(null);
 
-| File                                 | Key                                                                                                                                                                                                                                         |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `HeroSlider.jsx`                     | `hero.welcomeTo`, `brand.name`, `hero.cta`; `aria-label` → `common.nextSlide`, `common.prevSlide`; `Slide ${i+1}` → `t('common.slideN', { n: i + 1 })`. Chuyển `caption1/caption2/btnText` trong mảng slide thành **key**, dịch khi render. |
-| `IntroSection.jsx`                   | `common.discover`, `brand.name`, `intro.romantic.*`, `intro.food.*`, `intro.wine.*`, `common.learnMore`                                                                                                                                     |
-| `WelcomeSection.jsx`                 | `welcome.subtitle`, `welcome.title`, `welcome.text`, `welcome.story`                                                                                                                                                                        |
-| `MenuSection.jsx`                    | `common.discover`, `menuSection.title`, `menu.lunch`, `menu.dinner`, `menuSection.happyHour`, `menuSection.drink`, `menuSection.starters`, `menuSection.dessert`                                                                            |
-| `VideoSection.jsx`, `VideoModal.jsx` | `common.discover`, `video.title`, `video.modalTitle`, `common.close`                                                                                                                                                                        |
-| `EventSection.jsx`                   | `events.subtitle`, `events.title`, `events.days/hours/minutes/seconds`, `common.viewDetails`, `common.nextSlide/prevSlide`                                                                                                                  |
-| `ReviewSection.jsx`                  | `reviews.subtitle`, `reviews.title`                                                                                                                                                                                                         |
-| `BlogSection.jsx`                    | `blogSection.subtitle`, `blogSection.title`, `common.readMore`                                                                                                                                                                              |
+export function useLanguage() {
+  const ctx = useContext(LanguageContext);
+  if (!ctx) throw new Error('useLanguage must be used inside LanguageProvider');
+  return ctx;
+}
+```
 
-Các đoạn lorem ipsum ở section này (`*.text`) trong JSON hiện là **bản nháp trung tính**; ghi chú cho chủ dự án thay bằng nội dung thật.
-Nội dung bài viết, sự kiện, đánh giá (tiêu đề, tên khách, nội dung) thuộc **dữ liệu động** → xử lý ở Giai đoạn 5, tạm thời để nguyên.
+**`LanguageProvider.jsx`**
 
-### Bước 1.4 — Đặt bàn (`Reservation.jsx`, `BookingSection.jsx`, `utils/reservationConstants.jsx`)
+```jsx
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LanguageContext, SUPPORTED_LANGS } from './languageContext';
+import vi from './locales/vi.json';
+import en from './locales/en.json';
 
-1. Nhãn và placeholder → `booking.subtitle|title|date|time|guests|name|phone|email|submit`.
-2. `peopleOptions` hiện là chuỗi như `'1 Person'`. Đổi thành `value` **số** (1…n); nhãn tạo trong component:
-   `t(n === 1 ? 'booking.people.one' : 'booking.people.other', { count: n })`.
-3. `react-datepicker`: đăng ký locale tiếng Việt và truyền theo ngôn ngữ hiện tại:
-   ```jsx
-   import { registerLocale } from 'react-datepicker';
-   import { vi } from 'date-fns/locale/vi';
-   import { enUS } from 'date-fns/locale/en-US';
-   registerLocale('vi', vi);
-   registerLocale('en', enUS);
-   // <DatePicker locale={lang} ... />
+const DICTIONARIES = { vi, en };
+const DEFAULT_LANG = 'vi';
+const STORAGE_KEY = 'app_lang';
+
+function getInitialLang() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return SUPPORTED_LANGS.includes(saved) ? saved : DEFAULT_LANG;
+  } catch {
+    return DEFAULT_LANG;
+  }
+}
+
+export function LanguageProvider({ children }) {
+  const [lang, setLang] = useState(getInitialLang);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      /* bỏ qua */
+    }
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  // thiếu key -> lùi về tiếng Việt -> cuối cùng trả về chính key
+  const t = useCallback(
+    (key, params = {}) => {
+      const text =
+        DICTIONARIES[lang][key] ?? DICTIONARIES[DEFAULT_LANG][key] ?? key;
+      return text.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
+    },
+    [lang],
+  );
+
+  const value = useMemo(() => ({ lang, setLang, t }), [lang, t]);
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+```
+
+**`LanguageSelect.jsx`** — ô chọn (`<select>` gốc, truy cập tốt trên mobile)
+
+```jsx
+import { useLanguage, SUPPORTED_LANGS } from './languageContext';
+
+export default function LanguageSelect({ className = '' }) {
+  const { lang, setLang, t } = useLanguage();
+  return (
+    <select
+      className={`lang-select ${className}`}
+      value={lang}
+      onChange={(e) => setLang(e.target.value)}
+      aria-label={t('language.label')}
+    >
+      {SUPPORTED_LANGS.map((code) => (
+        <option key={code} value={code}>
+          {t(`language.${code}`)}
+        </option>
+      ))}
+    </select>
+  );
+}
+```
+
+Thêm CSS vào `src/styles/main.css` (header nền gradient, chữ trắng; **kiểm tra bằng mắt**):
+
+```css
+.lang-select {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lang-select option {
+  color: #222;
+}
+```
+
+**`format.js`**
+
+```js
+const LOCALES = { vi: 'vi-VN', en: 'en-US' };
+
+export const pickText = (field, lang) =>
+  typeof field === 'string' ? field : (field?.[lang] ?? field?.vi ?? '');
+
+export const formatPrice = (value, lang) =>
+  new Intl.NumberFormat(LOCALES[lang] ?? LOCALES.vi, {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(value);
+
+export const formatDate = (iso, lang) =>
+  new Intl.DateTimeFormat(LOCALES[lang] ?? LOCALES.vi, {
+    dateStyle: 'long',
+  }).format(new Date(iso));
+```
+
+**Gắn vào ứng dụng**
+
+- `src/main.jsx`: bọc `<App />` bằng `<LanguageProvider>` (bên trong `BrowserRouter`).
+- `src/components/layout/Header.jsx`: đổi mảng `links` sang `labelKey` (`nav.home|menu|reservation|gallery|about|blog|contact`),
+  render `{t(labelKey)}`; đặt `<LanguageSelect />` trong khối `.social`, ngay trước nút `btn-show-sidebar`; `aria-label="Open Sidebar"` → `t('common.openSidebar')`.
+- Kiểm tra màn hình ≤ 991px: nếu khối `.social` bị ẩn, đặt thêm `<LanguageSelect />` trong `Sidebar.jsx`.
+
+**Hoàn thành khi:** chọn "English" thì menu điều hướng đổi chữ ngay, tải lại trang vẫn giữ lựa chọn, `<html lang>` đổi theo; lint và build pass.
+
+### Bước A2 — Trang Menu (đã nối API) ⚠ có thay đổi logic
+
+`Menu.jsx` hiện **phân loại món bằng từ khóa trong tên danh mục** (`'khai vị'`, `'starter'`...). Khi API trả tên danh mục đã dịch,
+cách này sẽ vỡ. Phải đổi sang **mã `section` ổn định** (không đổi theo ngôn ngữ):
+
+```jsx
+const bySection = (code) => menuItems.filter((item) => item.section === code);
+const starters = bySection('starters'); // drinks, desserts, mains, lunch, dinner tương tự
+```
+
+Các việc cần làm:
+
+1. Xóa `filterByCategory` và hàm `formatPrice` cục bộ; dùng `formatPrice(price, lang)` từ `i18n/format.js` (giá luôn VND, bỏ nhánh USD).
+2. Tiêu đề (`Pato Menu`, `STARTERS`, `DRINKS`, `DESSERT`, `MAIN`, `Lunch`, `Dinner`) → `menu.pageTitle|starters|drinks|desserts|mains|lunch|dinner`.
+3. Chuỗi tiếng Việt cứng ("Đang tải dữ liệu từ database...", "Chưa có món khai vị nào.", thông báo lỗi) → `menu.loading`, `menu.empty.*`, `menu.error`.
+   Không hiển thị `err.message` thô cho khách (hiện đang làm vậy); ghi lỗi vào `console.error`.
+4. `getMenuItems({ lang })` thêm `lang` vào `params`; `useEffect` phụ thuộc `[lang]` để tự tải lại khi đổi ngôn ngữ; dùng `AbortController` (truyền `signal` cho `axios`) và bỏ qua lỗi hủy.
+   Bước này chỉ hoàn chỉnh khi backend đã hỗ trợ `?lang=` (B2); trước đó thêm `lang` vào request là vô hại (backend bỏ qua tham số lạ).
+5. **Trước khi bỏ bộ lọc theo tên**, chạy kiểm tra: món nào chỉ khớp theo tên danh mục mà **chưa có dòng trong `website_menu_items`** sẽ biến mất khỏi trang.
+   ```sql
+   SELECT mi.id, mi.name FROM menu_items mi
+   WHERE mi.is_available = 1
+     AND NOT EXISTS (SELECT 1 FROM website_menu_items w WHERE w.menu_item_id = mi.id);
    ```
-   Kiểm tra `renderCustomDatePickerHeader` (cuối `reservationConstants.jsx`): nếu tự gõ tên tháng tiếng Anh thì thay bằng
-   `Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' })`.
-4. `handleSubmit` hiện dùng `alert('Booking Details: ...')` (chữ cứng). Tạm thời đổi nội dung `alert` sang `t()`; sẽ thay bằng gọi API ở Bước 5.3.
-5. Thêm kiểm tra form cơ bản dùng `validation.required|email|phone` (chỉ khi form chưa có validate; không thêm thư viện).
+   Có kết quả thì báo chủ dự án (thêm vào `website_menu_items` hoặc chấp nhận không hiển thị). Seed hiện tại (`@web_menu`) gán section cho mọi món web.
 
-**Hoàn thành khi:** form đặt bàn, lịch chọn ngày hiển thị đúng tiếng Việt/Anh; giá trị gửi đi (số khách, ngày) **không phụ thuộc ngôn ngữ**.
+### Bước A3 — Các trang còn lại: thay chữ cứng bằng `t()`
 
-### Bước 1.5 — Các trang còn lại
+Mỗi nhóm một commit; **không đổi class, bố cục, thư viện**.
 
-| Trang            | Key                                                                                                                                                                                                                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `About.jsx`      | `about.pageTitle`, `welcome.subtitle`, `welcome.story`, `common.discover`, `video.title`, `about.recipes.*`, `about.romantic.*`, `about.chef.title`, `common.playVideo`. Tên đầu bếp và lời giới thiệu là nội dung riêng → để nguyên (xem Giai đoạn 5). |
-| `Contact.jsx`    | `contact.*`, `common.everyDay`; `title` của iframe → `contact.mapTitle`; địa chỉ/điện thoại lấy từ `siteInfo`                                                                                                                                           |
-| `Gallery.jsx`    | `gallery.pageTitle`, `common.viewPhoto`                                                                                                                                                                                                                 |
-| `Blog.jsx`       | `blog.pageTitle`, `nav.home`, `common.readMore`, `blog.categories                                                                                                                                                                                       | popular | archive`, `common.search`, `blog.noResults` (hiển thị khi lọc không có kết quả) |
-| `BlogDetail.jsx` | `blog.*` (nhóm bình luận), `nav.home`, `nav.blog`                                                                                                                                                                                                       |
+| Nhóm       | File                                                                                                                                        | Key chính                                                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layout     | `Footer.jsx`, `Sidebar.jsx`, `SignUpSection.jsx`                                                                                            | `footer.*`, `common.closeSidebar`, `common.everyDay`, `signup.*`; copyright: `t('footer.copyright', { year: new Date().getFullYear() })`        |
+| Trang chủ  | `HeroSlider`, `IntroSection`, `WelcomeSection`, `MenuSection`, `VideoSection`, `VideoModal`, `EventSection`, `ReviewSection`, `BlogSection` | `hero.*`, `intro.*`, `welcome.*`, `menuSection.*`, `video.*`, `events.*` (days/hours/minutes/seconds), `reviews.*`, `blogSection.*`, `common.*` |
+| Đặt bàn    | `Reservation.jsx`, `BookingSection.jsx`, `utils/reservationConstants.jsx`                                                                   | `booking.*`, `validation.*`                                                                                                                     |
+| Trang khác | `About`, `Contact`, `Gallery`, `Blog`, `BlogDetail`                                                                                         | `about.*`, `contact.*`, `gallery.*`, `blog.*`                                                                                                   |
 
-`blog.js`: đổi `day: '28'`, `monthYear: 'Dec, 2018'`, `comments: '8 Comments'` thành `date: '2018-12-28'` và `commentCount: 8`;
-hiển thị bằng `formatDate` và `blog.comments.one|other`.
+Lưu ý kỹ thuật:
 
-### Bước 1.6 — Rà soát và hoàn thiện giao diện
+- `HeroSlider`: chuyển `caption1/caption2/btnText` trong mảng slide thành key; `Slide ${i+1}` → `t('common.slideN', { n: i + 1 })`.
+- `reservationConstants.jsx`: `peopleOptions` đang là chuỗi `'1 Person'`; đổi `value` thành **số**, nhãn tạo trong component bằng `booking.people.one|other`.
+  `alert(...)` trong `handleSubmit` đang chứa chữ cứng → dùng `t()` (sẽ thay bằng gọi API khi nối endpoint đặt bàn vào frontend).
+- `react-datepicker`: `registerLocale('vi', vi)` với `import { vi } from 'date-fns/locale/vi'` (và `enUS`), truyền `locale={lang}`.
+  Nếu `renderCustomDatePickerHeader` tự gõ tên tháng tiếng Anh, thay bằng `Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' })`.
+- `blog.js` đang lưu `day`, `monthYear`, `comments` dạng chuỗi tiếng Anh → đổi thành `date` (ISO) và `commentCount` (số) rồi dùng `formatDate` và `blog.comments.*`.
+- Địa chỉ/điện thoại/email/giờ mở cửa ở Footer và Contact hiện là dữ liệu mẫu New York. **Không đưa vào JSON.** Khi nối `GET /api/settings` (Bước B6) sẽ lấy từ DB; tạm thời để nguyên.
+- Các đoạn văn mô tả trong JSON (`welcome.text`, `intro.*.text`, `about.*.text`) là **bản nháp**; nếu nội dung đó thuộc `site_settings` (vd `about_content`) thì dùng DB, không nhân đôi.
 
-- [ ] Quét chữ cứng còn sót: tìm văn bản tiếng Anh trong JSX và thuộc tính (`placeholder|alt|title|aria-label`).
-- [ ] Tiếng Việt thường dài hơn: kiểm tra nút, menu, tab, tiêu đề không bị tràn hoặc xuống dòng xấu ở mobile (≤576px).
-- [ ] **Font:** `main.css` import Montserrat, Poppins, Courgette, Noto Sans. Courgette có thể **không có glyph tiếng Việt** →
-      mở trang với "Đặt bàn", "Thực đơn", "Tráng miệng" và kiểm tra bằng mắt; nếu lỗi thì chọn font có subset `vietnamese`
-      (ví dụ Dancing Script, Pacifico) hoặc đặt `font-family` dự phòng cho các class dùng Courgette.
-- [ ] `document.title` đổi theo ngôn ngữ (tùy chọn): thêm key `meta.title` và cập nhật trong `LanguageProvider`.
-- [ ] Chạy script đồng bộ key (mục 2.4).
+### Bước A4 — Rà soát
 
----
-
-## 4. GIAI ĐOẠN 2 — Chốt phạm vi nội dung DB (cần xác nhận của chủ dự án)
-
-Trước khi viết SQL, **hỏi và ghi lại quyết định**:
-
-1. Thực thể nào dịch? Mặc định: `menu_categories`, `menu_items`. Thêm `dining_tables.area` **chỉ khi** khách nhìn thấy trường này.
-   Blog, sự kiện, đầu bếp **chưa có bảng** trong `restaurant_db.sql`; chỉ tạo bảng dịch cho chúng **sau khi** bảng gốc được tạo.
-2. Ai nhập bản dịch tiếng Anh: SQL thủ công / trang admin / dịch máy rồi người duyệt. (Không dịch tự động lúc khách xem trang.)
-3. Có thêm ngôn ngữ thứ ba trong tương lai không? (Kế hoạch này dùng bảng riêng nên đã sẵn sàng.)
+- [ ] Tìm chữ cứng còn sót (văn bản trong JSX và thuộc tính `placeholder|alt|title|aria-label`).
+- [ ] Tiếng Việt thường dài hơn: kiểm tra nút/menu/tab không tràn ở ≤ 576px.
+- [ ] **Font:** `main.css` dùng Montserrat, Poppins, Courgette, Noto Sans. Courgette có thể **không có glyph tiếng Việt** → xem bằng mắt "Đặt bàn", "Tráng miệng"; nếu lỗi thì thêm font dự phòng/đổi font cho class dùng Courgette.
+- [ ] Chạy script đồng bộ key (mục 2.4); lint + build pass.
 
 ---
 
-## 5. GIAI ĐOẠN 3 — Bảng dịch riêng cho từng thực thể
+## 4. PHẦN B — Database: bảng dịch riêng cho từng thực thể
 
-**Trước khi viết:** đọc `restaurant_db.sql`, ghi lại tên bảng, tên khóa chính, **độ dài thật** của các cột `name`, `description`
-(dùng đúng độ dài hoặc lớn hơn cho bảng dịch). Tên bên dưới là tên đã thấy trong schema; **xác minh lại**.
+### 4.1. Nguyên tắc thiết kế
 
-Quy ước bảng dịch: `<bảng>_translations`, khóa chính gộp `(<id>, lang_code)`, `lang_code VARCHAR(5)`,
-chuỗi dùng `NVARCHAR`, khóa ngoại tới bảng gốc, **không** `ON DELETE CASCADE` (hệ thống dùng `is_available` để ngừng bán, không xóa).
-Bản gốc tiếng Việt vẫn ở bảng gốc; bảng dịch chỉ chứa ngôn ngữ khác (`'en'`).
+- Bản gốc **tiếng Việt** giữ nguyên ở bảng gốc. Bảng `*_translations` chỉ chứa ngôn ngữ khác (`'en'`).
+- Tên bảng: `<bảng_gốc_số_ít>_translations`; khóa chính gộp `(<khóa_gốc>, lang_code)`; khóa ngoại tới bảng gốc;
+  `CHECK (lang_code <> 'vi')`; `updated_at` để theo dõi.
+- Cột dịch chính (`name`/`title`) `NOT NULL`; cột phụ cho phép `NULL`. **Dịch từng trường, thiếu trường nào thì lùi về tiếng Việt trường đó** (`COALESCE(NULLIF(t.col, N''), base.col)`).
+- Không dịch khóa/định danh: `slug`, `code`, `section`, `setting_key` giữ nguyên để URL và mã ổn định.
+- Độ dài cột dịch **bằng hoặc lớn hơn** cột gốc (đã đối chiếu `restaurant_db.sql`).
+- Không `ON DELETE CASCADE` (hệ thống ẩn bằng cờ `is_available`/`is_published`, không xóa); xóa bản ghi gốc phải xử lý bản dịch tường minh.
+
+### 4.2. Danh sách thực thể và thứ tự thực hiện
+
+| Ưu tiên | Bảng gốc             | Bảng dịch (mới)                 | Cột dịch                              | Backend hiện có                                             |
+| ------- | -------------------- | ------------------------------- | ------------------------------------- | ----------------------------------------------------------- |
+| 1       | `menu_categories`    | `menu_category_translations`    | `name`                                | `GET /menu-categories`, `/menu-items` (kèm `category_name`) |
+| 1       | `menu_items`         | `menu_item_translations`        | `name`, `description`                 | `GET /menu-items`, `/menu-items/:id`                        |
+| 2       | `site_settings`      | `site_setting_translations`     | `setting_value` (chỉ khóa cần dịch)   | `GET /settings`, `/settings/:key`                           |
+| 3       | `blog_categories`    | `blog_category_translations`    | `name`                                | `GET /blog-categories`                                      |
+| 3       | `blog_posts`         | `blog_post_translations`        | `title`, `excerpt`, `content`, `tags` | `GET /blog-posts`, `/:slug`, `/most-viewed`                 |
+| 4       | `gallery_images`     | `gallery_image_translations`    | `title`                               | `GET /gallery`                                              |
+| 4       | `gallery_categories` | `gallery_category_translations` | `name`                                | (chưa có route)                                             |
+| 4       | `events`             | `event_translations`            | `title`, `description`                | **chưa có route**                                           |
+
+Không tạo bảng dịch cho: `dining_tables.area` (chỉ nội bộ, trừ khi khách thấy), `blog_popular_posts` (backend không dùng),
+`reviews`, `blog_comments`, `orders`... Khi một bảng chưa có route thì **chỉ tạo bảng dịch**, tạo endpoint khi module đó được xây.
+
+### 4.3. Cấu trúc script (thư mục `database/`, giữ `restaurant_db.sql` ở vị trí cũ)
+
+```text
+database/
+├── migrations/
+│   ├── 001_i18n_menu.sql            # menu_category_translations, menu_item_translations
+│   ├── 002_i18n_site_settings.sql
+│   ├── 003_i18n_blog.sql
+│   └── 004_i18n_gallery_events.sql
+├── seed/
+│   ├── 101_i18n_menu_en.sql         # bản dịch tiếng Anh DỰ THẢO — cần người duyệt
+│   ├── 102_i18n_site_settings_en.sql
+│   └── 103_i18n_blog_en.sql
+├── rollback/
+│   └── 001_down.sql ... 004_down.sql
+└── README.md                        # thứ tự chạy, cách kiểm tra
+```
+
+Thứ tự chạy: `restaurant_db.sql` → `migrations/*` → `seed/*`. Mỗi migration chạy lại hai lần liên tiếp **không lỗi**.
+
+### 4.4. Mẫu migration (đầy đủ cho nhóm menu; các nhóm khác theo đúng mẫu)
+
+`database/migrations/001_i18n_menu.sql`
 
 ```sql
--- 001_menu_translations.sql  (idempotent)
+USE RestaurantDB;
+GO
 IF OBJECT_ID('dbo.menu_category_translations', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.menu_category_translations (
         category_id INT           NOT NULL,
         lang_code   VARCHAR(5)    NOT NULL,
         name        NVARCHAR(100) NOT NULL,
+        updated_at  DATETIME2     NOT NULL CONSTRAINT df_mct_updated DEFAULT SYSDATETIME(),
         CONSTRAINT pk_menu_category_translations PRIMARY KEY (category_id, lang_code),
-        CONSTRAINT fk_mct_category FOREIGN KEY (category_id) REFERENCES dbo.menu_categories(id)
+        CONSTRAINT fk_mct_category FOREIGN KEY (category_id) REFERENCES dbo.menu_categories(id),
+        CONSTRAINT ck_mct_lang CHECK (lang_code <> 'vi')
     );
 END;
-
+GO
 IF OBJECT_ID('dbo.menu_item_translations', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.menu_item_translations (
@@ -220,218 +371,196 @@ BEGIN
         lang_code    VARCHAR(5)    NOT NULL,
         name         NVARCHAR(150) NOT NULL,
         description  NVARCHAR(500) NULL,
+        updated_at   DATETIME2     NOT NULL CONSTRAINT df_mit_updated DEFAULT SYSDATETIME(),
         CONSTRAINT pk_menu_item_translations PRIMARY KEY (menu_item_id, lang_code),
-        CONSTRAINT fk_mit_menu_item FOREIGN KEY (menu_item_id) REFERENCES dbo.menu_items(id)
+        CONSTRAINT fk_mit_item FOREIGN KEY (menu_item_id) REFERENCES dbo.menu_items(id),
+        CONSTRAINT ck_mit_lang CHECK (lang_code <> 'vi')
     );
 END;
-
--- ROLLBACK:
--- DROP TABLE dbo.menu_item_translations;
--- DROP TABLE dbo.menu_category_translations;
+GO
 ```
 
-Dữ liệu dịch (luôn dùng tiền tố `N'...'` cho Unicode). Viết file riêng `002_seed_menu_translations_en.sql`,
-**chỉ INSERT** bản dịch cho các id đã tồn tại; không `UPDATE`/`DELETE` bảng gốc.
+`database/rollback/001_down.sql`
 
-Đặt các file trong `backend/database/migrations/` đánh số tăng dần, kèm hướng dẫn chạy trong README của backend.
+```sql
+USE RestaurantDB;
+GO
+DROP TABLE IF EXISTS dbo.menu_item_translations;
+DROP TABLE IF EXISTS dbo.menu_category_translations;
+GO
+```
 
-**Hoàn thành khi:** migration chạy hai lần liên tiếp không lỗi; `SELECT` bảng gốc cho kết quả y như trước;
-rollback xóa sạch các bảng mới.
+Các bảng còn lại (cùng khuôn, đúng kiểu cột gốc):
 
-Các bảng sau tạo **khi và chỉ khi** bảng gốc đã tồn tại: `blog_post_translations`, `event_translations`,
-`dining_table_translations` — theo đúng mẫu trên.
+| Bảng dịch                       | Khóa                                                    | Cột                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `site_setting_translations`     | `(setting_key VARCHAR(100) → site_settings, lang_code)` | `setting_value NVARCHAR(2000) NOT NULL`                                                                               |
+| `blog_category_translations`    | `(category_id → blog_categories, lang_code)`            | `name NVARCHAR(100) NOT NULL`                                                                                         |
+| `blog_post_translations`        | `(post_id → blog_posts, lang_code)`                     | `title NVARCHAR(200) NOT NULL`, `excerpt NVARCHAR(500) NULL`, `content NVARCHAR(MAX) NULL`, `tags NVARCHAR(200) NULL` |
+| `gallery_image_translations`    | `(image_id → gallery_images, lang_code)`                | `title NVARCHAR(150) NOT NULL`                                                                                        |
+| `gallery_category_translations` | `(category_id → gallery_categories, lang_code)`         | `name NVARCHAR(100) NOT NULL`                                                                                         |
+| `event_translations`            | `(event_id → events, lang_code)`                        | `title NVARCHAR(200) NOT NULL`, `description NVARCHAR(500) NULL`                                                      |
+
+### 4.5. Mẫu seed bản dịch (idempotent, khớp theo tên tiếng Việt, không phụ thuộc id)
+
+```sql
+-- seed/101_i18n_menu_en.sql  — BẢN DỊCH DỰ THẢO, cần chủ nhà hàng duyệt
+USE RestaurantDB;
+GO
+INSERT INTO dbo.menu_category_translations (category_id, lang_code, name)
+SELECT c.id, 'en', v.en_name
+FROM (VALUES
+    (N'Khai vị',     N'Starters'),
+    (N'Đồ uống',     N'Drinks')
+    -- ... đủ mọi danh mục trong restaurant_db.sql
+) v(vi_name, en_name)
+JOIN dbo.menu_categories c ON c.name = v.vi_name
+WHERE NOT EXISTS (SELECT 1 FROM dbo.menu_category_translations t WHERE t.category_id = c.id AND t.lang_code = 'en');
+GO
+INSERT INTO dbo.menu_item_translations (menu_item_id, lang_code, name, description)
+SELECT m.id, 'en', v.en_name, v.en_desc
+FROM (VALUES
+    (N'Canh bí đỏ kem tươi', N'Creamy pumpkin soup', N'Pureed pumpkin, fresh cream and cashew nuts')
+    -- ... đủ mọi món trong restaurant_db.sql
+) v(vi_name, en_name, en_desc)
+JOIN dbo.menu_items m ON m.name = v.vi_name
+WHERE NOT EXISTS (SELECT 1 FROM dbo.menu_item_translations t WHERE t.menu_item_id = m.id AND t.lang_code = 'en');
+GO
+```
+
+Luôn dùng tiền tố `N'...'`. Agent đọc `restaurant_db.sql` để liệt kê **toàn bộ** danh mục/món/bài viết cần dịch; bản dịch là **dự thảo** — ghi rõ trong file và báo chủ dự án duyệt (đặc biệt tên món Việt như "gỏi cuốn", "bún chả": nên giữ tên gốc kèm mô tả).
+
+Khóa `site_settings` nên dịch: `slogan`, `opening_days`, `about_title`, `about_content`, `reservation_note` (và `address` nếu muốn bản tiếng Anh). **Không dịch**: `site_name` (tên thương hiệu), `phone`, `email`, `*_url`, `opening_hours` (giờ giấc).
 
 ---
 
-## 6. GIAI ĐOẠN 4 — Backend vanilla Node.js
+## 5. PHẦN B (tiếp) — Backend hỗ trợ `?lang=`
 
-Thư mục `backend/` (cùng repo, `package.json` riêng). Mặc định dùng **ESM** (`"type": "module"`) cho đồng nhất với frontend;
-hỏi chủ dự án nếu muốn CommonJS.
-
-```text
-backend/
-├── src/
-│   ├── server.js            # http.createServer, lắng nghe PORT
-│   ├── app.js               # bộ định tuyến chính + xử lý lỗi toàn cục
-│   ├── config/{env.js,database.js}   # đọc/kiểm tra env khi khởi động; pool mssql dùng chung
-│   ├── routes/menuRoutes.js
-│   ├── controllers/menuController.js
-│   ├── services/menuService.js
-│   ├── repositories/menuRepository.js
-│   ├── middlewares/{cors.js,errorHandler.js,bodyParser.js}
-│   └── utils/{lang.js,http.js}
-├── database/migrations/
-├── tests/
-├── .env.example
-└── package.json             # dependency: mssql (+ dotenv hoặc --env-file của Node)
-```
-
-### 6.1. Khung server (chỉ module có sẵn của Node)
-
-- Router tự viết: so khớp theo `method` + `pathname` (bảng route), trả `404` JSON cho route lạ, `405` cho sai method.
-- `bodyParser`: đọc JSON an toàn, giới hạn kích thước (ví dụ 1 MB → `413`), JSON hỏng → `400`.
-- **CORS tường minh:** chỉ cho phép origin trong biến `CORS_ORIGINS`; xử lý `OPTIONS`.
-- Header bảo mật cơ bản (`X-Content-Type-Options: nosniff`...). Lỗi trả JSON, **không lộ stack trace**.
-- Env bắt buộc kiểm tra lúc khởi động: `PORT`, `DB_SERVER`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `CORS_ORIGINS`. Thiếu thì dừng với thông báo rõ.
-
-### 6.2. `utils/lang.js`
+### 5.1. Tiện ích chọn ngôn ngữ — `backend/src/utils/lang.js`
 
 ```js
-const SUPPORTED = ['vi', 'en'];
-const DEFAULT_LANG = 'vi';
+export const SUPPORTED_LANGS = ['vi', 'en'];
+export const DEFAULT_LANG = 'vi';
 
-export function resolveLang(req, url) {
-  const fromQuery = url.searchParams.get('lang');
-  if (SUPPORTED.includes(fromQuery)) return fromQuery;
+// 1) ?lang=  2) Accept-Language  3) mặc định 'vi'. Danh sách trắng → an toàn khi đưa vào truy vấn.
+export function resolveLang(req) {
+  const fromQuery = new URL(req.url, 'http://localhost').searchParams.get(
+    'lang',
+  );
+  if (SUPPORTED_LANGS.includes(fromQuery)) return fromQuery;
   const first = (req.headers['accept-language'] ?? '')
     .split(',')[0]
     ?.trim()
     .slice(0, 2)
     .toLowerCase();
-  return SUPPORTED.includes(first) ? first : DEFAULT_LANG;
+  return SUPPORTED_LANGS.includes(first) ? first : DEFAULT_LANG;
 }
 ```
 
-### 6.3. Repository (mẫu — xác minh tên cột theo `restaurant_db.sql`)
+Frontend **luôn gửi `?lang=`** nên không phụ thuộc `Accept-Language`; dự phòng này chỉ cho client khác.
+
+### 5.2. Mẫu cho từng module (ví dụ menu)
+
+- **Controller** (`menu.controller.js`): `const lang = resolveLang(req);` rồi truyền cho service; thêm header `Content-Language` và `Vary: Accept-Language`
+  (mở rộng `sendSuccess(res, data, status = 200, headers = {})` để nhận header phụ, không đổi hành vi cũ).
+- **Service:** truyền `lang` xuống repository (mặc định `'vi'`); không thêm luật nghiệp vụ mới.
+- **Repository:** luôn truyền `@lang` bằng `.input('lang', sql.VarChar(5), lang)`:
+  ```sql
+  SELECT mi.id, mi.category_id,
+         COALESCE(NULLIF(mit.name, N''), mi.name)               AS name,
+         COALESCE(NULLIF(mit.description, N''), mi.description) AS description,
+         mi.price, mi.image_url, mi.is_available, mi.created_at,
+         COALESCE(NULLIF(mct.name, N''), mc.name)               AS category_name,
+         wmi.section, COALESCE(wmi.sort_order, 999) AS sort_order
+  FROM menu_items mi
+  JOIN menu_categories mc ON mc.id = mi.category_id
+  LEFT JOIN website_menu_items wmi ON wmi.menu_item_id = mi.id
+  LEFT JOIN menu_item_translations mit     ON mit.menu_item_id = mi.id AND mit.lang_code = @lang
+  LEFT JOIN menu_category_translations mct ON mct.category_id  = mc.id AND mct.lang_code = @lang
+  WHERE (@categoryId IS NULL OR mi.category_id = @categoryId) AND mi.is_available = 1
+  ORDER BY COALESCE(wmi.sort_order, 999) ASC, mi.created_at DESC
+  OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+  ```
+  Với `lang='vi'` không có dòng dịch nào (nhờ `CHECK`), kết quả y hệt hiện tại.
+- Áp dụng cùng mẫu cho `listCategories`, `findItemById`, và (khi tới lượt) `settings`, `blog`, `gallery`.
+- **Không dịch** các endpoint ghi (POST/PATCH hiện có) và dữ liệu trả về từ chúng; chúng thao tác trên bản gốc tiếng Việt.
+
+### 5.3. Endpoint quản lý bản dịch (MANAGER/ADMIN)
+
+CORS hiện chỉ cho `GET,POST,PATCH,DELETE,OPTIONS` → dùng **PATCH** (không thêm PUT).
+
+| Endpoint                                                | Quyền          | Việc                                            |
+| ------------------------------------------------------- | -------------- | ----------------------------------------------- |
+| `GET /api/menu-items/:id/translations`                  | MANAGER, ADMIN | Liệt kê bản dịch của món (để form sửa hiển thị) |
+| `PATCH /api/menu-items/:id/translations/:lang`          | MANAGER, ADMIN | Tạo/cập nhật bản dịch `{ name, description }`   |
+| `PATCH /api/menu-categories/:id/translations/:lang`     | MANAGER, ADMIN | `{ name }`                                      |
+| `PATCH /api/settings/:key/translations/:lang`           | ADMIN          | `{ value }`                                     |
+| (tương tự cho blog, gallery, events khi module tồn tại) |                |                                                 |
+
+Quy tắc: `:lang` phải thuộc danh sách trắng và **khác `vi`** (`400`, code `UNSUPPORTED_LANG`); bản ghi gốc không tồn tại → `404`;
+chuỗi rỗng hoặc vượt độ dài cột → `400`. Ghi bằng **transaction**, `UPDATE` trước, nếu `rowsAffected = 0` thì `INSERT`
+(tránh `MERGE`; dùng `UPDLOCK, HOLDLOCK` để an toàn khi đồng thời):
 
 ```js
-import sql from 'mssql';
-
-export async function findMenu(pool, lang) {
-  const { recordset } = await pool.request().input('lang', sql.VarChar(5), lang)
-    .query(`
-      SELECT c.id AS categoryId,
-             COALESCE(ct.name, c.name) AS categoryName,
-             c.sort_order AS sortOrder,
-             m.id, m.price, m.image_url AS imageUrl,
-             COALESCE(mt.name, m.name)               AS name,
-             COALESCE(mt.description, m.description) AS description
-      FROM dbo.menu_categories c
-      LEFT JOIN dbo.menu_category_translations ct ON ct.category_id = c.id AND ct.lang_code = @lang
-      JOIN dbo.menu_items m ON m.category_id = c.id AND m.is_available = 1
-      LEFT JOIN dbo.menu_item_translations mt ON mt.menu_item_id = m.id AND mt.lang_code = @lang
-      ORDER BY c.sort_order, m.name
-    `);
-  return recordset;
+const upd = await new sql.Request(tx)
+  .input('id', sql.Int, id)
+  .input('lang', sql.VarChar(5), lang)
+  .input('name', sql.NVarChar(150), name)
+  .input('desc', sql.NVarChar(500), description ?? null)
+  .query(`UPDATE menu_item_translations WITH (UPDLOCK, HOLDLOCK)
+          SET name = @name, description = @desc, updated_at = SYSDATETIME()
+          WHERE menu_item_id = @id AND lang_code = @lang`);
+if (upd.rowsAffected[0] === 0) {
+  await new sql.Request(tx)
+    .input('id', sql.Int, id)
+    .input('lang', sql.VarChar(5), lang)
+    .input('name', sql.NVarChar(150), name)
+    .input('desc', sql.NVarChar(500), description ?? null)
+    .query(`INSERT INTO menu_item_translations (menu_item_id, lang_code, name, description)
+            VALUES (@id, @lang, @name, @desc)`);
 }
 ```
 
-Cơ chế dự phòng: `COALESCE` → món/danh mục chưa có bản dịch vẫn hiện tiếng Việt, không bao giờ rỗng.
+Tên bảng/cột trong mã ghi bản dịch là **hằng cố định trong code** (có thể gom vào một object cấu hình), tuyệt đối không lấy từ dữ liệu người dùng.
 
-### 6.4. Hợp đồng API
+### 5.4. Kiểm thử backend (`node:test`, thêm vào `backend/tests/`, đổi script test thành `node --env-file=.env.example --test tests/`)
 
-`GET /api/menu?lang=vi|en` → `200`
+- `resolveLang`: ưu tiên `?lang=`; `lang=fr` → rơi về `Accept-Language`; không có gì → `vi`.
+- Repository (mock `pool`): có truyền `@lang`, không nối chuỗi vào câu SQL.
+- Controller: `?lang=en` có header `Content-Language: en`; không `?lang` → hành vi cũ, `Content-Language: vi`.
+- Endpoint ghi bản dịch: `lang=vi` → 400 `UNSUPPORTED_LANG`; không có token → 401; sai vai trò → 403; món không tồn tại → 404.
+- Kiểm thử tích hợp với SQL Server thật chỉ chạy khi có DB; nếu chưa có thì **ghi rõ "chưa chạy"**, không giả lập kết quả.
 
-```json
-{
-  "data": [
-    {
-      "categoryId": 1,
-      "categoryName": "Khai vị",
-      "items": [
-        {
-          "id": 1,
-          "name": "Gỏi cuốn",
-          "description": "…",
-          "price": 55000,
-          "imageUrl": "…"
-        }
-      ]
-    }
-  ]
-}
-```
+### 5.5. Nối frontend cho từng module khi trang đó dùng API
 
-Header: `Content-Type: application/json; charset=utf-8`, `Content-Language: <lang>`, `Vary: Accept-Language`.
-`price` là **số VND**. Service gộp các dòng phẳng thành nhóm theo danh mục.
-
-Lỗi (mọi endpoint): `{ "error": { "code": "VALIDATION_ERROR", "message": "…" } }` với mã HTTP phù hợp
-(`400, 401, 403, 404, 405, 409, 413, 500`). **Backend trả `code`, không trả câu chữ theo ngôn ngữ**;
-frontend ánh xạ `code` sang `t('error.<CODE>')` (thêm key khi cần). Giá và tổng tiền luôn tính ở backend.
-
-### 6.5. Kiểm thử (`node:test` + `node:assert/strict`)
-
-- `resolveLang`: ưu tiên `?lang=`; `lang` không hợp lệ → dùng `Accept-Language`; mặc định `vi`.
-- Service gộp danh mục: đúng nhóm, đúng thứ tự, danh mục rỗng bị bỏ.
-- Router: route lạ → 404; sai method → 405; JSON hỏng → 400; body quá lớn → 413.
-- Repository: mock `pool`, kiểm tra truyền tham số `lang` và không có nối chuỗi.
-- Chạy: `node --test`. Báo cáo kết quả thật.
-
-**Hoàn thành khi:** `GET /api/menu?lang=en` và `?lang=vi` trả dữ liệu đúng; món chưa dịch vẫn hiện tiếng Việt;
-`lang=fr` rơi về `vi`; không có truy vấn nối chuỗi.
-
-### 6.6. (Tùy chọn, sau khi chốt Giai đoạn 2) Ghi bản dịch qua admin
-
-`PUT /api/admin/menu-items/:id/translations/:lang` — yêu cầu role `ADMIN` hoặc `MANAGER` (kiểm tra ở backend, không tin frontend).
-Dùng **transaction**, `UPDATE` trước, nếu `rowsAffected = 0` thì `INSERT` (tránh `MERGE`); kèm `UPDLOCK, HOLDLOCK` để an toàn khi chạy đồng thời.
-Chỉ làm khi hệ thống xác thực/phân quyền đã có.
+- Thêm `lang` vào hàm service tương ứng (vd `menuService.getMenuItems({ lang })`, `getMenuCategories({ lang })`), `useEffect` phụ thuộc `[lang]`.
+- Chỉ nối trang nào **đã** dùng API. Blog/gallery/sự kiện/đánh giá hiện đang dùng `src/data/*.js`; chuyển sang API là việc riêng, ngoài phạm vi i18n (khi làm, áp dụng cùng mẫu, và hiển thị ngày bằng `formatDate`).
 
 ---
 
-## 7. GIAI ĐOẠN 5 — Nối frontend với API
+## 6. Thứ tự thực hiện (checklist)
 
-### Bước 5.1 — Cấu hình
+- [ ] **0** Sửa lỗi nền (mục 2.2): build trên Linux, lint, `backend/.env.example`
+- [ ] **A1** `src/i18n/*` + hai file JSON (130 key) + `LanguageSelect` trong Header
+- [ ] **A2** Trang Menu: phân nhóm theo `section`, `formatPrice`, `t()`, `lang` trong API call
+- [ ] **A3** Footer/Sidebar/SignUp → trang chủ → đặt bàn → About/Contact/Gallery/Blog
+- [ ] **A4** Rà soát chữ cứng, font tiếng Việt, độ dài chữ, đồng bộ key
+- [ ] **B1** `database/migrations/001` (menu) + rollback + seed dự thảo → chạy hai lần không lỗi
+- [ ] **B2** `utils/lang.js` + menu: controller/service/repository + test
+- [ ] **B3** Endpoint ghi bản dịch menu (PATCH) + test
+- [ ] **B4** Kiểm tra end-to-end `Menu.jsx` đổi ngôn ngữ tải lại đúng (cần DB đã chạy B1)
+- [ ] **B5** `002` (site_settings), `003` (blog), `004` (gallery, events): migration + seed + backend `lang` cho route đã tồn tại
+- [ ] **B6** (tùy chọn) Footer/Contact đọc `GET /api/settings?lang=` thay cho dữ liệu mẫu
 
-- Thêm `VITE_API_URL` vào `.env` và `.env.example` (placeholder, không secret).
+## 7. Việc cần hỏi chủ dự án (agent không tự quyết)
 
-### Bước 5.2 — Menu từ API
+1. Ai duyệt bản dịch tiếng Anh dự thảo (tên món, mô tả, bài blog)? Tên món Việt giữ nguyên hay dịch?
+2. Có đưa Footer/Contact sang đọc từ `site_settings` không (hiện là dữ liệu mẫu New York)?
+3. Trang nào ưu tiên nối API tiếp theo (blog, gallery, sự kiện)? Có cần route `events` không?
+4. Font tiêu đề Courgette không hỗ trợ tiếng Việt thì chọn font thay thế nào?
+5. Có cần thêm ngôn ngữ thứ ba trong tương lai không? (Thiết kế bảng dịch đã sẵn sàng; chỉ cần thêm vào `SUPPORTED_LANGS`, JSON và dữ liệu dịch.)
 
-- Tạo `src/hooks/useMenu.js`: gọi `GET {VITE_API_URL}/api/menu?lang=${lang}` bằng `fetch`
-  (dùng `axios` chỉ khi đã có trong `package.json`), `AbortController`, `useEffect` phụ thuộc `[lang]`
-  → **đổi ngôn ngữ tự tải lại**. Trả về `{ data, loading, error }`.
-- `pages/Menu.jsx` và `MenuSection.jsx`: thay `src/data/menu.js` bằng `useMenu()`; hiển thị `common.loading`,
-  `common.empty`, `error.network`. Giữ `formatPrice(price, lang)`.
-- Giữ `data/menu.js` làm dữ liệu dự phòng khi dev chưa chạy backend (tùy chọn); xóa khi chủ dự án đồng ý.
+## 8. Báo cáo sau mỗi bước
 
-### Bước 5.3 — Đặt bàn gọi API (chỉ khi có endpoint và bảng đặt bàn)
-
-- Thay `alert(...)` bằng `POST`; gửi **giá trị thô** (ngày ISO, số khách, tên, điện thoại, email), không gửi chuỗi đã dịch.
-- Hiển thị lỗi theo `error.code` → `t('error.<CODE>')`.
-
-### Bước 5.4 — Blog, sự kiện, đánh giá, đầu bếp
-
-- Chỉ khi chủ dự án xác nhận đưa vào DB: tạo bảng gốc → bảng dịch → endpoint → hook, theo đúng mẫu của menu.
-- `reviews`: **không dịch** nội dung khách viết.
-
----
-
-## 8. Lưu ý chất lượng và bảo mật
-
-- **Mã hóa:** luôn `NVARCHAR` và `N'...'`; header JSON có `charset=utf-8`; tránh `?` thay cho chữ có dấu.
-- **Cache (nếu thêm sau này):** khóa cache phải gồm `lang`. Giữ `Vary: Accept-Language`.
-- **Đơn hàng:** client chỉ gửi `menu_item_id` + số lượng; backend tự lấy giá/tên. Lịch sử đơn/hóa đơn dùng `unit_price` đã lưu;
-  kiểm tra schema xem tên món có được snapshot chưa — nếu chưa, **báo chủ dự án**, không tự sửa dữ liệu cũ.
-- **Xác thực/phân quyền** (khi cần): băm mật khẩu bằng `bcrypt`/`bcryptjs`, kiểm quyền ở backend, không log token/mật khẩu.
-- **Truy cập:** `document.documentElement.lang` luôn khớp ngôn ngữ; nút chuyển ngôn ngữ có `aria-pressed`.
-- **SEO (tùy chọn):** đổi ngôn ngữ bằng state không tạo URL riêng. Nếu SEO quan trọng, cân nhắc route `/vi/...`, `/en/...`.
-
----
-
-## 9. Danh sách việc (checklist theo thứ tự)
-
-- [x] 1.1 Nền tảng i18n + `vi.json`/`en.json` (119 key), Header, trang Menu
-- [ ] 1.2 Footer, Sidebar, SignUpSection (+ `siteInfo.js`)
-- [ ] 1.3 Section trang chủ
-- [ ] 1.4 Đặt bàn + date picker + `reservationConstants`
-- [ ] 1.5 About, Contact, Gallery, Blog, BlogDetail
-- [ ] 1.6 Rà soát chữ cứng, font tiếng Việt, độ dài chữ, đồng bộ key
-- [ ] 2 Chốt phạm vi nội dung DB và người nhập bản dịch
-- [ ] 3 Migration bảng dịch menu + dữ liệu mẫu tiếng Anh (+ rollback)
-- [ ] 4 Backend vanilla Node.js + `GET /api/menu?lang=` + test
-- [ ] 5.1–5.2 Biến môi trường + `useMenu` + thay dữ liệu tĩnh bằng API
-- [ ] 5.3 Đặt bàn gọi API (nếu có)
-- [ ] 5.4 Blog / sự kiện / đánh giá (nếu chủ dự án xác nhận)
-
-## 10. Việc cần hỏi chủ dự án (agent không tự quyết)
-
-1. Thay giá trị tạm trong `src/data/menu.js` (giá VND thật) và nội dung lorem ipsum bằng nội dung thật?
-2. Giữ khối "Latest twitter" của template hay bỏ?
-3. "Italian Restaurant" (`welcome.subtitle`) có đúng với nhà hàng không?
-4. Backend dùng ESM hay CommonJS? SQL Server chạy ở đâu (máy cục bộ/Docker/server) và thông tin kết nối?
-5. Ai nhập bản dịch tiếng Anh cho thực đơn?
-6. Blog, sự kiện, đầu bếp có đưa vào DB không?
-
-## 11. Định dạng báo cáo sau mỗi bước
-
-Agent phải trả: (1) danh sách file đã sửa/tạo, (2) key đã thêm, (3) **kết quả thật** của `npm run lint`, `vite build`, `node --test`
-(nếu chưa chạy, ghi rõ "chưa chạy"), (4) những gì chưa làm hoặc còn rủi ro, (5) câu hỏi cần chủ dự án quyết định.
+Trả về: (1) file đã tạo/sửa, (2) key hoặc bảng đã thêm, (3) **kết quả thật** của `npm run lint`, `npx vite build`, `npm test`
+(chưa chạy thì ghi "chưa chạy"), (4) việc chưa làm hoặc rủi ro, (5) câu hỏi cần chủ dự án quyết.

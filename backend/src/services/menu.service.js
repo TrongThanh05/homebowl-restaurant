@@ -2,11 +2,12 @@
 
 import * as menuRepo from '../repositories/menu.repository.js';
 import { badRequest, notFound, conflict } from '../utils/errors.js';
+import { SUPPORTED_LANGS } from '../utils/lang.js';
 
 // ── CATEGORIES ────────────────────────────────────────────────
 
-export async function listCategories() {
-  return menuRepo.listCategories();
+export async function listCategories(lang = 'vi') {
+  return menuRepo.listCategories(lang);
 }
 
 export async function getCategoryById(id) {
@@ -37,21 +38,21 @@ export async function deleteCategory(id) {
 
 // ── ITEMS ─────────────────────────────────────────────────────
 
-export async function listItems(query) {
+export async function listItems(query, lang = 'vi') {
   const page = Math.max(1, parseInt(query.page || '1', 10));
   const pageSize = Math.min(100, Math.max(1, parseInt(query.pageSize || '10', 10)));
   const categoryId = query.categoryId ? parseInt(query.categoryId, 10) : null;
 
   const [items, total] = await Promise.all([
-    menuRepo.listItems(categoryId, page, pageSize),
+    menuRepo.listItems(categoryId, page, pageSize, lang),
     menuRepo.countItems(categoryId),
   ]);
 
   return { items, meta: { page, pageSize, total } };
 }
 
-export async function getItemById(id) {
-  const item = await menuRepo.findItemById(Number(id));
+export async function getItemById(id, lang = 'vi') {
+  const item = await menuRepo.findItemById(Number(id), lang);
   if (!item) throw notFound('Món ăn không tồn tại');
   return item;
 }
@@ -84,4 +85,37 @@ export async function setAvailability(id, body) {
   if (!item) throw notFound('Món ăn không tồn tại');
   if (body.is_available === undefined) throw badRequest('Trường is_available là bắt buộc');
   return menuRepo.setAvailability(Number(id), Boolean(body.is_available));
+}
+
+// ── TRANSLATIONS ──────────────────────────────────────────────
+
+function validateLang(lang) {
+  if (!SUPPORTED_LANGS.includes(lang) || lang === 'vi') {
+    throw badRequest('Ngôn ngữ không được hỗ trợ hoặc là ngôn ngữ gốc (vi)', 'UNSUPPORTED_LANG');
+  }
+}
+
+export async function getItemTranslations(id) {
+  const item = await menuRepo.findItemById(Number(id));
+  if (!item) throw notFound('Món ăn không tồn tại');
+  return menuRepo.getItemTranslations(Number(id));
+}
+
+export async function upsertItemTranslation(id, lang, body) {
+  validateLang(lang);
+  const item = await menuRepo.findItemById(Number(id));
+  if (!item) throw notFound('Món ăn không tồn tại');
+  if (!body.name || !body.name.trim()) throw badRequest('Tên bản dịch là bắt buộc');
+  if (body.name.length > 150) throw badRequest('Tên bản dịch quá dài (tối đa 150 ký tự)');
+  if (body.description && body.description.length > 500) throw badRequest('Mô tả quá dài (tối đa 500 ký tự)');
+  return menuRepo.upsertItemTranslation(Number(id), lang, body.name.trim(), body.description ?? null);
+}
+
+export async function upsertCategoryTranslation(id, lang, body) {
+  validateLang(lang);
+  const cat = await menuRepo.findCategoryById(Number(id));
+  if (!cat) throw notFound('Danh mục không tồn tại');
+  if (!body.name || !body.name.trim()) throw badRequest('Tên bản dịch là bắt buộc');
+  if (body.name.length > 100) throw badRequest('Tên bản dịch quá dài (tối đa 100 ký tự)');
+  return menuRepo.upsertCategoryTranslation(Number(id), lang, body.name.trim());
 }

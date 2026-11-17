@@ -4,10 +4,18 @@ import { getPool, sql } from '../config/database.js';
 
 // ── CATEGORIES ──────────────────────────────────────────────
 
-export async function listCategories() {
+export async function listCategories(lang = 'vi') {
   const pool = await getPool();
   const result = await pool.request()
-    .query('SELECT id, name, sort_order FROM menu_categories ORDER BY sort_order');
+    .input('lang', sql.VarChar(5), lang)
+    .query(`
+      SELECT mc.id,
+             COALESCE(NULLIF(mct.name, N''), mc.name) AS name,
+             mc.sort_order
+      FROM menu_categories mc
+      LEFT JOIN menu_category_translations mct ON mct.category_id = mc.id AND mct.lang_code = @lang
+      ORDER BY mc.sort_order
+    `);
   return result.recordset;
 }
 
@@ -70,22 +78,27 @@ export async function deleteCategory(id) {
 
 // ── ITEMS ────────────────────────────────────────────────────
 
-export async function listItems(categoryId, page, pageSize) {
+export async function listItems(categoryId, page, pageSize, lang = 'vi') {
   const pool = await getPool();
   const offset = (page - 1) * pageSize;
   const result = await pool.request()
     .input('categoryId', sql.Int, categoryId ?? null)
     .input('offset', sql.Int, offset)
     .input('pageSize', sql.Int, pageSize)
+    .input('lang', sql.VarChar(5), lang)
     .query(`
-      SELECT mi.id, mi.category_id, mi.name, mi.description, mi.price,
-             mi.image_url, mi.is_available, mi.created_at,
-             mc.name AS category_name,
+      SELECT mi.id, mi.category_id,
+             COALESCE(NULLIF(mit.name, N''), mi.name)               AS name,
+             COALESCE(NULLIF(mit.description, N''), mi.description) AS description,
+             mi.price, mi.image_url, mi.is_available, mi.created_at,
+             COALESCE(NULLIF(mct.name, N''), mc.name)               AS category_name,
              wmi.section,
              COALESCE(wmi.sort_order, 999) AS sort_order
       FROM menu_items mi
       JOIN menu_categories mc ON mc.id = mi.category_id
       LEFT JOIN website_menu_items wmi ON wmi.menu_item_id = mi.id
+      LEFT JOIN menu_item_translations mit     ON mit.menu_item_id = mi.id AND mit.lang_code = @lang
+      LEFT JOIN menu_category_translations mct ON mct.category_id  = mc.id AND mct.lang_code = @lang
       WHERE (@categoryId IS NULL OR mi.category_id = @categoryId)
         AND mi.is_available = 1
       ORDER BY COALESCE(wmi.sort_order, 999) ASC, mi.created_at DESC
@@ -107,15 +120,22 @@ export async function countItems(categoryId) {
   return result.recordset[0].total;
 }
 
-export async function findItemById(id) {
+export async function findItemById(id, lang = 'vi') {
   const pool = await getPool();
   const result = await pool.request()
     .input('id', sql.Int, id)
+    .input('lang', sql.VarChar(5), lang)
     .query(`
-      SELECT mi.*, mc.name AS category_name, wmi.section
+      SELECT mi.id, mi.category_id,
+             COALESCE(NULLIF(mit.name, N''), mi.name)               AS name,
+             COALESCE(NULLIF(mit.description, N''), mi.description) AS description,
+             mi.price, mi.image_url, mi.is_available, mi.created_at,
+             mc.name AS category_name,
+             wmi.section
       FROM menu_items mi
       JOIN menu_categories mc ON mc.id = mi.category_id
       LEFT JOIN website_menu_items wmi ON wmi.menu_item_id = mi.id
+      LEFT JOIN menu_item_translations mit ON mit.menu_item_id = mi.id AND mit.lang_code = @lang
       WHERE mi.id = @id
     `);
   return result.recordset[0] || null;
@@ -181,4 +201,77 @@ export async function setAvailability(id, isAvailable) {
       WHERE id = @id
     `);
   return result.recordset[0] || null;
+}
+
+// ── TRANSLATIONS ─────────────────────────────────────────────
+
+export async function getItemTranslations(menuItemId) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, menuItemId)
+    .query(`
+      SELECT lang_code, name, description, updated_at
+      FROM menu_item_translations
+      WHERE menu_item_id = @id
+      ORDER BY lang_code
+    `);
+  return result.recordset;
+}
+
+export async function upsertItemTranslation(menuItemId, langCode, name, description) {
+  const pool = await getPool();
+  const tx = pool.transaction();
+  await tx.begin();
+  try {
+    const upd = await new sql.Request(tx)
+      .input('id', sql.Int, menuItemId)
+      .input('lang', sql.VarChar(5), langCode)
+      .input('name', sql.NVarChar(150), name)
+      .input('desc', sql.NVarChar(500), description)
+      .query(`UPDATE menu_item_translations WITH (UPDLOCK, HOLDLOCK)
+              SET name = @name, description = @desc, updated_at = SYSDATETIME()
+              WHERE menu_item_id = @id AND lang_code = @lang`);
+    if (upd.rowsAffected[0] === 0) {
+      await new sql.Request(tx)
+        .input('id', sql.Int, menuItemId)
+        .input('lang', sql.VarChar(5), langCode)
+        .input('name', sql.NVarChar(150), name)
+        .input('desc', sql.NVarChar(500), description)
+        .query(`INSERT INTO menu_item_translations (menu_item_id, lang_code, name, description)
+                VALUES (@id, @lang, @name, @desc)`);
+    }
+    await tx.commit();
+    return { menu_item_id: menuItemId, lang_code: langCode, name, description };
+  } catch (err) {
+    await tx.rollback();
+    throw err;
+  }
+}
+
+export async function upsertCategoryTranslation(categoryId, langCode, name) {
+  const pool = await getPool();
+  const tx = pool.transaction();
+  await tx.begin();
+  try {
+    const upd = await new sql.Request(tx)
+      .input('id', sql.Int, categoryId)
+      .input('lang', sql.VarChar(5), langCode)
+      .input('name', sql.NVarChar(100), name)
+      .query(`UPDATE menu_category_translations WITH (UPDLOCK, HOLDLOCK)
+              SET name = @name, updated_at = SYSDATETIME()
+              WHERE category_id = @id AND lang_code = @lang`);
+    if (upd.rowsAffected[0] === 0) {
+      await new sql.Request(tx)
+        .input('id', sql.Int, categoryId)
+        .input('lang', sql.VarChar(5), langCode)
+        .input('name', sql.NVarChar(100), name)
+        .query(`INSERT INTO menu_category_translations (category_id, lang_code, name)
+                VALUES (@id, @lang, @name)`);
+    }
+    await tx.commit();
+    return { category_id: categoryId, lang_code: langCode, name };
+  } catch (err) {
+    await tx.rollback();
+    throw err;
+  }
 }

@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 
 const MenuSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="section-ourmenu bg2-pattern p-t-115 p-b-120">
       <div className="container">
         <div className="title-section-ourmenu t-center m-b-22">
-          <span className="tit2 t-center">Discover</span>
+          <span className="tit2 t-center">{t('common.discover')}</span>
 
-          <h3 className="tit5 t-center m-t-2">Our Menu</h3>
+          <h3 className="tit5 t-center m-t-2">{t('menuSection.title')}</h3>
         </div>
 
         <div className="row">
@@ -18,7 +20,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-01.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size4">
-                    Lunch
+                    {t('menu.lunch')}
                   </Link>
                 </div>
               </div>
@@ -27,7 +29,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-05.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size5">
-                    Dinner
+                    {t('menu.dinner')}
                   </Link>
                 </div>
               </div>
@@ -36,7 +38,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-13.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size6">
-                    Happy Hour
+                    {t('menuSection.happyHour')}
                   </Link>
                 </div>
               </div>
@@ -49,7 +51,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-08.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size7">
-                    Drink
+                    {t('menuSection.drink')}
                   </Link>
                 </div>
               </div>
@@ -58,7 +60,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-10.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size8">
-                    Starters
+                    {t('menuSection.starters')}
                   </Link>
                 </div>
               </div>
@@ -67,7 +69,7 @@ const MenuSection = () => {
                 <div className="item-ourmenu bo-rad-10 hov-img-zoom pos-relative m-t-30">
                   <img src={getImage('our-menu-16.jpg')} alt="IMG-MENU" />
                   <Link to="/Menu" className="btn2 flex-c-m txt5 ab-c-m size9">
-                    Dessert
+                    {t('menuSection.dessert')}
                   </Link>
                 </div>
               </div>

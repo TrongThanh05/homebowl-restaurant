@@ -3,9 +3,11 @@ import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import { getImage } from '../utils/images';
 import { galleryCategories, galleryItems } from '../data/gallery';
+import { useLanguage } from '../i18n/languageContext';
 import SignUpSection from '../components/common/SignUpSection';
 
 export default function Gallery() {
+  const { t } = useLanguage();
   const [activeFilter, setActiveFilter] = useState('*');
   const [activePage, setActivePage] = useState(1);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
@@ -26,7 +28,7 @@ export default function Gallery() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-02.jpg')})` }}
       >
-        <h2 className="tit6 t-center">Gallery</h2>
+        <h2 className="tit6 t-center">{t('gallery.pageTitle')}</h2>
       </section>
 
       {/* Gallery Section */}
@@ -63,7 +65,7 @@ export default function Gallery() {
                   type="button"
                   className="btn-show-gallery flex-c-m fa fa-search border-0"
                   onClick={() => setLightboxIndex(index)}
-                  aria-label="View photo"
+                  aria-label={t('common.viewPhoto')}
                 ></button>
               </div>
             </div>

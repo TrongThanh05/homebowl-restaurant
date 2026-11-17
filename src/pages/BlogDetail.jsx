@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getImage } from '../utils/images';
+import { useLanguage } from '../i18n/languageContext';
 import {
   blogPosts,
   blogCategories,
@@ -10,6 +11,7 @@ import {
 } from '../data/blog';
 
 export default function BlogDetail() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [commentData, setCommentData] = useState({
@@ -41,7 +43,7 @@ export default function BlogDetail() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-03.jpg')})` }}
       >
-        <h2 className="tit6 t-center">Blog</h2>
+        <h2 className="tit6 t-center">{t('blog.pageTitle')}</h2>
       </section>
 
       {/* Content page */}
@@ -50,11 +52,11 @@ export default function BlogDetail() {
         <div className="bread-crumb bo5-b p-t-17 p-b-17">
           <div className="container">
             <Link to="/" className="txt27">
-              Home
+              {t('nav.home')}
             </Link>
             <span className="txt29 m-l-10 m-r-10">/</span>
             <Link to="/Blog" className="txt27">
-              Blog
+              {t('nav.blog')}
             </Link>
             <span className="txt29 m-l-10 m-r-10">/</span>
             <span className="txt29">{post.title}</span>
@@ -128,17 +130,14 @@ export default function BlogDetail() {
                   className="leave-comment p-t-10"
                   onSubmit={handleCommentSubmit}
                 >
-                  <h4 className="txt33 p-b-14">Leave a Comment</h4>
+                  <h4 className="txt33 p-b-14">{t('blog.leaveComment')}</h4>
 
-                  <p>
-                    Your email address will not be published. Required fields are
-                    marked *
-                  </p>
+                  <p>{t('blog.commentNote')}</p>
 
                   <textarea
                     className="bo-rad-10 size29 bo2 txt10 p-l-20 p-t-15 m-b-10 m-t-40 bgwhite"
                     name="comment"
-                    placeholder="Comment..."
+                    placeholder={t('blog.commentPlaceholder')}
                     value={commentData.comment}
                     onChange={handleCommentChange}
                     required
@@ -149,7 +148,7 @@ export default function BlogDetail() {
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="text"
                       name="name"
-                      placeholder="Name *"
+                      placeholder={t('blog.namePlaceholder')}
                       value={commentData.name}
                       onChange={handleCommentChange}
                       required
@@ -161,7 +160,7 @@ export default function BlogDetail() {
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="email"
                       name="email"
-                      placeholder="Email *"
+                      placeholder={t('blog.emailPlaceholder')}
                       value={commentData.email}
                       onChange={handleCommentChange}
                       required
@@ -173,7 +172,7 @@ export default function BlogDetail() {
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="text"
                       name="website"
-                      placeholder="Website"
+                      placeholder={t('blog.websitePlaceholder')}
                       value={commentData.website}
                       onChange={handleCommentChange}
                     />
@@ -183,7 +182,7 @@ export default function BlogDetail() {
                     type="submit"
                     className="btn3 flex-c-m size31 txt11 trans-0-4"
                   >
-                    Post Comment
+                    {t('blog.postComment')}
                   </button>
                 </form>
               </div>
@@ -198,14 +197,14 @@ export default function BlogDetail() {
                     className="input-search-sidebar2 txt10 p-l-20 p-r-55"
                     type="text"
                     name="search"
-                    placeholder="Search"
+                    placeholder={t('common.search')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <button
                     type="button"
                     className="btn-search-sidebar2 flex-c-m ti-search trans-0-4 border-0 bg-transparent"
-                    aria-label="Search"
+                    aria-label={t('common.search')}
                   >
                     <i className="fa fa-search" aria-hidden="true"></i>
                   </button>
@@ -213,7 +212,7 @@ export default function BlogDetail() {
 
                 {/* Categories */}
                 <div className="categories">
-                  <h4 className="txt33 bo5-b p-b-35 p-t-58">Categories</h4>
+                  <h4 className="txt33 bo5-b p-b-35 p-t-58">{t('blog.categories')}</h4>
 
                   <ul>
                     {blogCategories.map((cat, idx) => (
@@ -228,7 +227,7 @@ export default function BlogDetail() {
 
                 {/* Most Popular */}
                 <div className="popular">
-                  <h4 className="txt33 p-b-35 p-t-58">Most popular</h4>
+                  <h4 className="txt33 p-b-35 p-t-58">{t('blog.popular')}</h4>
 
                   <ul>
                     {popularPosts.map((item, idx) => (
@@ -253,7 +252,7 @@ export default function BlogDetail() {
 
                 {/* Archive */}
                 <div className="archive">
-                  <h4 className="txt33 p-b-20 p-t-43">Archive</h4>
+                  <h4 className="txt33 p-b-20 p-t-43">{t('blog.archive')}</h4>
 
                   <ul>
                     {blogArchives.map((arch, idx) => (

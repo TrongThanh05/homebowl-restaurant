@@ -7,6 +7,7 @@ import {
   listPosts, getMostViewed, getArchive, getPostBySlug, createPost, updatePost,
   listBlogCategories,
   listPendingComments, createComment, approveComment,
+  getPostTranslations, upsertPostTranslation, upsertBlogCategoryTranslation,
 } from '../controllers/blog.controller.js';
 
 const router = createRouter();
@@ -15,12 +16,15 @@ const router = createRouter();
 router.get('/blog-posts/most-viewed', getMostViewed);
 router.get('/blog-posts/archive', getArchive);
 router.get('/blog-posts', listPosts);
+router.get('/blog-posts/:id/translations', authenticate, requireRole('MANAGER', 'ADMIN'), getPostTranslations);
+router.patch('/blog-posts/:id/translations/:lang', authenticate, requireRole('MANAGER', 'ADMIN'), upsertPostTranslation);
 router.get('/blog-posts/:slug', getPostBySlug);
 router.post('/blog-posts', authenticate, requireRole('MANAGER', 'ADMIN'), createPost);
 router.patch('/blog-posts/:id', authenticate, requireRole('MANAGER', 'ADMIN'), updatePost);
 
 // Blog categories
 router.get('/blog-categories', listBlogCategories);
+router.patch('/blog-categories/:id/translations/:lang', authenticate, requireRole('MANAGER', 'ADMIN'), upsertBlogCategoryTranslation);
 
 // Blog comments
 router.get('/blog-comments', authenticate, requireRole('MANAGER', 'ADMIN'), listPendingComments);

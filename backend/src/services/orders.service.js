@@ -2,7 +2,6 @@
 
 import * as ordersRepo from '../repositories/orders.repository.js';
 import { findItemById } from '../repositories/menu.repository.js';
-import { listEmployees } from '../repositories/employees.repository.js';
 import { getPool, sql } from '../config/database.js';
 import { badRequest, notFound, conflict, forbidden } from '../utils/errors.js';
 

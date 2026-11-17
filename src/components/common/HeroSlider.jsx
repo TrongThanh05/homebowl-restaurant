@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SliderLib from 'react-slick';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../i18n/languageContext';
 import AnimatedLayer from './AnimatedLayer';
 import slide01 from '../../assets/images/slide1-01.jpg';
 import slide02 from '../../assets/images/master-slides-02.jpg';
@@ -14,60 +15,54 @@ const slides = [
     id: 1,
     bg: slide01,
     extraClass: 'item1-slick1',
-    caption1: 'Welcome to',
     caption2: 'Pato Place',
     appear1: 'fadeInDown',
     appear2: 'fadeInUp',
     appearBtn: 'zoomIn',
-    btnText: 'Look Menu',
     btnLink: '/Menu',
   },
   {
     id: 2,
     bg: slide02,
     extraClass: 'item2-slick1',
-    caption1: 'Welcome to',
     caption2: 'Pato Place',
     appear1: 'rollIn',
     appear2: 'lightSpeedIn',
     appearBtn: 'slideInUp',
-    btnText: 'Look Menu',
     btnLink: '/Menu',
   },
   {
     id: 3,
     bg: slide03,
     extraClass: 'item3-slick1',
-    caption1: 'Welcome to',
     caption2: 'Pato Place',
     appear1: 'rotateInDownLeft',
     appear2: 'rotateInUpRight',
     appearBtn: 'rotateIn',
-    btnText: 'Look Menu',
     btnLink: '/Menu',
   },
 ];
 
-function NextArrow({ onClick }) {
+function NextArrow({ onClick, label }) {
   return (
     <button
       type="button"
       className="arrow-slick1 next-slick1"
       onClick={onClick}
-      aria-label="Next slide"
+      aria-label={label}
     >
       <i className="fa fa-angle-right" aria-hidden="true"></i>
     </button>
   );
 }
 
-function PrevArrow({ onClick }) {
+function PrevArrow({ onClick, label }) {
   return (
     <button
       type="button"
       className="arrow-slick1 prev-slick1"
       onClick={onClick}
-      aria-label="Previous slide"
+      aria-label={label}
     >
       <i className="fa fa-angle-left" aria-hidden="true"></i>
     </button>
@@ -76,6 +71,7 @@ function PrevArrow({ onClick }) {
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
+  const { t } = useLanguage();
 
   const settings = {
     fade: true,
@@ -87,14 +83,14 @@ export default function HeroSlider() {
     dots: true,
     dotsClass: 'wrap-slick1-dots',
     pauseOnHover: false,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow label={t('common.nextSlide')} />,
+    prevArrow: <PrevArrow label={t('common.prevSlide')} />,
     appendDots: (dots) => (
       <div className="wrap-slick1-dots">
         <ul className="slick1-dots">{dots}</ul>
       </div>
     ),
-    customPaging: (i) => <button type="button" aria-label={`Slide ${i + 1}`} />,
+    customPaging: (i) => <button type="button" aria-label={t('common.slideN', { n: i + 1 })} />,
     beforeChange: (_oldIndex, newIndex) => setCurrent(newIndex),
     afterChange: (index) => setCurrent(index),
   };
@@ -120,7 +116,7 @@ export default function HeroSlider() {
                       delay={0}
                       active={active}
                     >
-                      {slide.caption1}
+                      {t('hero.welcomeTo')}
                     </AnimatedLayer>
 
                     <AnimatedLayer
@@ -143,7 +139,7 @@ export default function HeroSlider() {
                         to={slide.btnLink}
                         className="btn1 flex-c-m size1 txt3 trans-0-4"
                       >
-                        {slide.btnText}
+                        {t('hero.cta')}
                       </Link>
                     </AnimatedLayer>
                   </div>

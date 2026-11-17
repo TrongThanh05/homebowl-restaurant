@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getImage } from '../utils/images';
+import { useLanguage } from '../i18n/languageContext';
 import {
   blogPosts,
   blogCategories,
@@ -10,6 +11,7 @@ import {
 } from '../data/blog';
 
 export default function Blog() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [activePage, setActivePage] = useState(1);
 
@@ -24,7 +26,7 @@ export default function Blog() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-03.jpg')})` }}
       >
-        <h2 className="tit6 t-center">Blog</h2>
+        <h2 className="tit6 t-center">{t('blog.pageTitle')}</h2>
       </section>
 
       {/* Content page */}
@@ -32,10 +34,10 @@ export default function Blog() {
         <div className="bread-crumb bo5-b p-t-17 p-b-17">
           <div className="container">
             <Link to="/" className="txt27">
-              Home
+              {t('nav.home')}
             </Link>
             <span className="txt29 m-l-10 m-r-10">/</span>
-            <span className="txt29">Blog</span>
+            <span className="txt29">{t('nav.blog')}</span>
           </div>
         </div>
 
@@ -89,7 +91,7 @@ export default function Blog() {
                         to={`/Blog/${post.id}`}
                         className="dis-block txt4 m-t-30"
                       >
-                        Continue Reading
+                        {t('common.readMore')}
                         <i
                           className="fa fa-long-arrow-right m-l-10"
                           aria-hidden="true"
@@ -132,14 +134,14 @@ export default function Blog() {
                     className="input-search-sidebar2 txt10 p-l-20 p-r-55"
                     type="text"
                     name="search"
-                    placeholder="Search"
+                    placeholder={t('common.search')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <button
                     type="button"
                     className="btn-search-sidebar2 flex-c-m ti-search trans-0-4 border-0 bg-transparent"
-                    aria-label="Search"
+                    aria-label={t('common.search')}
                   >
                     <i className="fa fa-search" aria-hidden="true"></i>
                   </button>
@@ -147,7 +149,7 @@ export default function Blog() {
 
                 {/* Categories */}
                 <div className="categories">
-                  <h4 className="txt33 bo5-b p-b-35 p-t-58">Categories</h4>
+                  <h4 className="txt33 bo5-b p-b-35 p-t-58">{t('blog.categories')}</h4>
 
                   <ul>
                     {blogCategories.map((cat, idx) => (
@@ -166,7 +168,7 @@ export default function Blog() {
 
                 {/* Most Popular */}
                 <div className="popular">
-                  <h4 className="txt33 p-b-35 p-t-58">Most popular</h4>
+                  <h4 className="txt33 p-b-35 p-t-58">{t('blog.popular')}</h4>
 
                   <ul>
                     {popularPosts.map((item, idx) => (
@@ -191,7 +193,7 @@ export default function Blog() {
 
                 {/* Archive */}
                 <div className="archive">
-                  <h4 className="txt33 p-b-20 p-t-43">Archive</h4>
+                  <h4 className="txt33 p-b-20 p-t-43">{t('blog.archive')}</h4>
 
                   <ul>
                     {blogArchives.map((arch, idx) => (

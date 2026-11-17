@@ -2,32 +2,33 @@
 import { useState } from 'react';
 import SliderLib from 'react-slick';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../i18n/languageContext';
 import AnimatedLayer from './AnimatedLayer';
 import { getImage } from '../../utils/images';
 import { eventsData } from '../../data/events';
 
 const Slider = SliderLib.default ?? SliderLib;
 
-function NextArrow({ onClick }) {
+function NextArrow({ onClick, label }) {
   return (
     <button
       type="button"
       className="arrow-slick2 next-slick2"
       onClick={onClick}
-      aria-label="Next slide"
+      aria-label={label}
     >
       <i className="fa fa-angle-right" aria-hidden="true"></i>
     </button>
   );
 }
 
-function PrevArrow({ onClick }) {
+function PrevArrow({ onClick, label }) {
   return (
     <button
       type="button"
       className="arrow-slick2 prev-slick2"
       onClick={onClick}
-      aria-label="Previous slide"
+      aria-label={label}
     >
       <i className="fa fa-angle-left" aria-hidden="true"></i>
     </button>
@@ -36,6 +37,7 @@ function PrevArrow({ onClick }) {
 
 export default function EventSection() {
   const [current, setCurrent] = useState(0);
+  const { t } = useLanguage();
 
   const settings = {
     fade: true,
@@ -47,14 +49,14 @@ export default function EventSection() {
     dots: true,
     dotsClass: 'wrap-slick2-dots',
     pauseOnHover: false,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow label={t('common.nextSlide')} />,
+    prevArrow: <PrevArrow label={t('common.prevSlide')} />,
     appendDots: (dots) => (
       <div className="wrap-slick2-dots">
         <ul className="slick2-dots">{dots}</ul>
       </div>
     ),
-    customPaging: (i) => <button type="button" aria-label={`Slide ${i + 1}`} />,
+    customPaging: (i) => <button type="button" aria-label={t('common.slideN', { n: i + 1 })} />,
     beforeChange: (_oldIndex, newIndex) => setCurrent(newIndex),
     afterChange: (index) => setCurrent(index),
   };
@@ -74,10 +76,10 @@ export default function EventSection() {
                   <div className="wrap-content-slide2 p-t-115 p-b-208">
                     <div className="container">
                       <div className="title-event t-center m-b-52">
-                        <span className="tit2 p-l-15 p-r-15">Upcomming</span>
+                        <span className="tit2 p-l-15 p-r-15">{t('events.subtitle')}</span>
 
                         <h3 className="tit6 t-center p-l-15 p-r-15 p-t-3">
-                          Events
+                          {t('events.title')}
                         </h3>
                       </div>
 
@@ -115,7 +117,7 @@ export default function EventSection() {
                               </span>
 
                               <span className="dis-block t-center txt8">
-                                Days
+                                {t('events.days')}
                               </span>
                             </div>
 
@@ -125,7 +127,7 @@ export default function EventSection() {
                               </span>
 
                               <span className="dis-block t-center txt8">
-                                Hours
+                                {t('events.hours')}
                               </span>
                             </div>
 
@@ -135,7 +137,7 @@ export default function EventSection() {
                               </span>
 
                               <span className="dis-block t-center txt8">
-                                Minutes
+                                {t('events.minutes')}
                               </span>
                             </div>
 
@@ -145,13 +147,13 @@ export default function EventSection() {
                               </span>
 
                               <span className="dis-block t-center txt8">
-                                Seconds
+                                {t('events.seconds')}
                               </span>
                             </div>
                           </div>
 
                           <Link to={event.link || '#'} className="txt4 m-t-40">
-                            View Details
+                            {t('common.viewDetails')}
                             <i
                               className="fa fa-long-arrow-right m-l-10"
                               aria-hidden="true"

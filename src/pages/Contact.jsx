@@ -1,8 +1,10 @@
 // src/pages/Contact.jsx
 import { useState } from 'react';
 import { getImage } from '../utils/images';
+import { useLanguage } from '../i18n/languageContext';
 
 export default function Contact() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,7 +21,7 @@ export default function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Thank you, ${formData.name}! Your message has been sent successfully.`);
+    alert(t('contact.successMsg', { name: formData.name }));
     setFormData({ name: '', email: '', phone: '', message: '' });
   };
 
@@ -30,7 +32,7 @@ export default function Contact() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-02.jpg')})` }}
       >
-        <h2 className="tit6 t-center">Contact</h2>
+        <h2 className="tit6 t-center">{t('contact.pageTitle')}</h2>
       </section>
 
       {/* Contact Section */}
@@ -40,7 +42,7 @@ export default function Contact() {
           <div className="map bo8 bo-rad-10 of-hidden">
             <div className="contact-map size37" id="google_map">
               <iframe
-                title="Google Map Location"
+                title={t('contact.mapTitle')}
                 src="https://maps.google.com/maps?q=40.704644,-74.011987&hl=en&z=14&output=embed"
                 width="100%"
                 height="100%"
@@ -54,7 +56,7 @@ export default function Contact() {
         </div>
 
         <div className="container">
-          <h3 className="tit7 t-center p-b-62 p-t-105">Send us a Message</h3>
+          <h3 className="tit7 t-center p-b-62 p-t-105">{t('contact.formTitle')}</h3>
 
           <form
             className="wrap-form-reservation size22 m-l-r-auto"
@@ -63,14 +65,14 @@ export default function Contact() {
             <div className="row">
               <div className="col-md-4">
                 {/* Name */}
-                <span className="txt9">Name</span>
+                <span className="txt9">{t('contact.name')}</span>
 
                 <div className="wrap-inputname size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                   <input
                     className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                     type="text"
                     name="name"
-                    placeholder="Name"
+                    placeholder={t('contact.name')}
                     value={formData.name}
                     onChange={handleChange}
                     required
@@ -80,14 +82,14 @@ export default function Contact() {
 
               <div className="col-md-4">
                 {/* Email */}
-                <span className="txt9">Email</span>
+                <span className="txt9">{t('contact.email')}</span>
 
                 <div className="wrap-inputemail size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                   <input
                     className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                     type="email"
                     name="email"
-                    placeholder="Email"
+                    placeholder={t('contact.email')}
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -97,14 +99,14 @@ export default function Contact() {
 
               <div className="col-md-4">
                 {/* Phone */}
-                <span className="txt9">Phone</span>
+                <span className="txt9">{t('contact.phone')}</span>
 
                 <div className="wrap-inputphone size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                   <input
                     className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                     type="tel"
                     name="phone"
-                    placeholder="Phone"
+                    placeholder={t('contact.phone')}
                     value={formData.phone}
                     onChange={handleChange}
                     required
@@ -114,11 +116,11 @@ export default function Contact() {
 
               <div className="col-12">
                 {/* Message */}
-                <span className="txt9">Message</span>
+                <span className="txt9">{t('contact.message')}</span>
                 <textarea
                   className="bo-rad-10 size35 bo2 txt10 p-l-20 p-t-15 m-b-10 m-t-3 bgwhite"
                   name="message"
-                  placeholder="Message"
+                  placeholder={t('contact.message')}
                   value={formData.message}
                   onChange={handleChange}
                   required
@@ -131,7 +133,7 @@ export default function Contact() {
                 type="submit"
                 className="btn3 flex-c-m size36 txt11 trans-0-4"
               >
-                Submit
+                {t('contact.submit')}
               </button>
             </div>
           </form>
@@ -147,7 +149,7 @@ export default function Contact() {
                 </div>
 
                 <div className="flex-col-l">
-                  <span className="txt5 p-b-10">Location</span>
+                  <span className="txt5 p-b-10">{t('contact.location')}</span>
 
                   <span className="txt23 size38">
                     8th floor, 379 Hudson St, New York, NY 10018
@@ -166,7 +168,7 @@ export default function Contact() {
                 </div>
 
                 <div className="flex-col-l">
-                  <span className="txt5 p-b-10">Call Us</span>
+                  <span className="txt5 p-b-10">{t('contact.callUs')}</span>
 
                   <span className="txt23 size38">(+1) 96 716 6879</span>
                 </div>
@@ -183,11 +185,11 @@ export default function Contact() {
                 </div>
 
                 <div className="flex-col-l">
-                  <span className="txt5 p-b-10">Opening Hours</span>
+                  <span className="txt5 p-b-10">{t('contact.openingHours')}</span>
 
                   <span className="txt23 size38">
                     09:30 AM – 11:00 PM <br />
-                    Every Day
+                    {t('common.everyDay')}
                   </span>
                 </div>
               </div>

@@ -21,7 +21,7 @@ export function authenticate(req, res, next) {
       roleName: payload.roleName,
     };
     next();
-  } catch (err) {
+  } catch {
     next(unauthorized('Token không hợp lệ hoặc đã hết hạn'));
   }
 }

@@ -12,8 +12,14 @@ export function sendJson(res, statusCode, body) {
   res.end(json);
 }
 
-export function sendSuccess(res, data, statusCode = 200) {
-  sendJson(res, statusCode, { success: true, data });
+export function sendSuccess(res, data, statusCode = 200, extraHeaders = {}) {
+  const json = JSON.stringify({ success: true, data });
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': Buffer.byteLength(json),
+    ...extraHeaders,
+  });
+  res.end(json);
 }
 
 export function sendError(res, err) {

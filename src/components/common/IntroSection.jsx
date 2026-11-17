@@ -1,13 +1,15 @@
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 
 const IntroSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="section-intro">
       <div
         className="header-intro parallax100 t-center p-t-135 p-b-158"
         style={{ backgroundImage: `url(${getImage('bg-intro-01.jpg')})` }}
       >
-        <span className="tit2 p-l-15 p-r-15">Discover</span>
+        <span className="tit2 p-l-15 p-r-15">{t('common.discover')}</span>
 
         <h3 className="tit4 t-center p-l-15 p-r-15 p-t-3">Pato Place</h3>
       </div>
@@ -26,17 +28,16 @@ const IntroSection = () => {
                 <div className="wrap-text-blo1 p-t-35">
                   <a href="#">
                     <h4 className="txt5 color0-hov trans-0-4 m-b-13">
-                      Romantic Restaurant
+                      {t('intro.romantic.title')}
                     </h4>
                   </a>
 
                   <p className="m-b-20">
-                    Phasellus lorem enim, luctus ut velit eget, con-vallis
-                    egestas eros.
+                    {t('intro.romantic.text')}
                   </p>
 
                   <a href="#" className="txt4">
-                    Learn More
+                    {t('common.learnMore')}
                     <i
                       className="fa fa-long-arrow-right m-l-10"
                       aria-hidden="true"
@@ -57,17 +58,16 @@ const IntroSection = () => {
                 <div className="wrap-text-blo1 p-t-35">
                   <a href="#">
                     <h4 className="txt5 color0-hov trans-0-4 m-b-13">
-                      Delicious Food
+                      {t('intro.food.title')}
                     </h4>
                   </a>
 
                   <p className="m-b-20">
-                    Aliquam eget aliquam magna, quis posuere risus ac justo
-                    ipsum nibh urna
+                    {t('intro.food.text')}
                   </p>
 
                   <a href="#" className="txt4">
-                    Learn More
+                    {t('common.learnMore')}
                     <i
                       className="fa fa-long-arrow-right m-l-10"
                       aria-hidden="true"
@@ -88,17 +88,16 @@ const IntroSection = () => {
                 <div className="wrap-text-blo1 p-t-35">
                   <a href="#">
                     <h4 className="txt5 color0-hov trans-0-4 m-b-13">
-                      Red Wines You Love
+                      {t('intro.wine.title')}
                     </h4>
                   </a>
 
                   <p className="m-b-20">
-                    Sed ornare ligula eget tortor tempor, quis porta tellus
-                    dictum.
+                    {t('intro.wine.text')}
                   </p>
 
                   <a href="#" className="txt4">
-                    Learn More
+                    {t('common.learnMore')}
                     <i
                       className="fa fa-long-arrow-right m-l-10"
                       aria-hidden="true"

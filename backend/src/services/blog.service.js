@@ -2,6 +2,7 @@
 
 import * as blogRepo from '../repositories/blog.repository.js';
 import { badRequest, notFound } from '../utils/errors.js';
+import { SUPPORTED_LANGS } from '../utils/lang.js';
 
 function generateSlug(title) {
   return title
@@ -14,29 +15,35 @@ function generateSlug(title) {
     .replace(/-+/g, '-') + '-' + Date.now();
 }
 
+function validateLang(lang) {
+  if (!SUPPORTED_LANGS.includes(lang) || lang === 'vi') {
+    throw badRequest('Ngôn ngữ không được hỗ trợ hoặc là ngôn ngữ gốc (vi)', 'UNSUPPORTED_LANG');
+  }
+}
+
 // ── POSTS ─────────────────────────────────────────────────────
 
-export async function listPosts(query) {
+export async function listPosts(query, lang = 'vi') {
   const page = Math.max(1, parseInt(query.page || '1', 10));
   const pageSize = Math.min(100, Math.max(1, parseInt(query.pageSize || '10', 10)));
   const categorySlug = query.categorySlug || null;
 
   const [items, total] = await Promise.all([
-    blogRepo.listPosts(page, pageSize, categorySlug),
+    blogRepo.listPosts(page, pageSize, categorySlug, lang),
     blogRepo.countPosts(categorySlug),
   ]);
   return { items, meta: { page, pageSize, total } };
 }
 
-export async function getPostBySlug(slug) {
-  const post = await blogRepo.findPostBySlug(slug);
+export async function getPostBySlug(slug, lang = 'vi') {
+  const post = await blogRepo.findPostBySlug(slug, lang);
   if (!post) throw notFound('Bài viết không tồn tại');
   return post;
 }
 
-export async function getMostViewed(query) {
+export async function getMostViewed(query, lang = 'vi') {
   const limit = Math.min(50, Math.max(1, parseInt(query.limit || '5', 10)));
-  return blogRepo.getMostViewed(limit);
+  return blogRepo.getMostViewed(limit, lang);
 }
 
 export async function getArchive() {
@@ -75,8 +82,8 @@ export async function updatePost(id, body) {
 
 // ── CATEGORIES ────────────────────────────────────────────────
 
-export async function listBlogCategories() {
-  return blogRepo.listBlogCategories();
+export async function listBlogCategories(lang = 'vi') {
+  return blogRepo.listBlogCategories(lang);
 }
 
 // ── COMMENTS ─────────────────────────────────────────────────
@@ -105,4 +112,37 @@ export async function approveComment(id, body) {
   const comment = await blogRepo.approveComment(Number(id), Boolean(is_approved));
   if (!comment) throw notFound('Bình luận không tồn tại');
   return comment;
+}
+
+// ── TRANSLATIONS ──────────────────────────────────────────────
+
+export async function getPostTranslations(id) {
+  const post = await blogRepo.findPostById(Number(id));
+  if (!post) throw notFound('Bài viết không tồn tại');
+  return blogRepo.getPostTranslations(Number(id));
+}
+
+export async function upsertPostTranslation(id, lang, body) {
+  validateLang(lang);
+  const post = await blogRepo.findPostById(Number(id));
+  if (!post) throw notFound('Bài viết không tồn tại');
+  if (!body.title || !body.title.trim()) throw badRequest('Tiêu đề bản dịch là bắt buộc');
+  if (body.title.length > 200) throw badRequest('Tiêu đề quá dài (tối đa 200 ký tự)');
+  if (body.excerpt && body.excerpt.length > 500) throw badRequest('Đoạn trích quá dài (tối đa 500 ký tự)');
+  if (body.tags && body.tags.length > 200) throw badRequest('Thẻ quá dài (tối đa 200 ký tự)');
+  return blogRepo.upsertPostTranslation(Number(id), lang, {
+    title: body.title.trim(),
+    excerpt: body.excerpt ? body.excerpt.trim() : null,
+    content: body.content ? body.content.trim() : null,
+    tags: body.tags ? body.tags.trim() : null,
+  });
+}
+
+export async function upsertBlogCategoryTranslation(id, lang, body) {
+  validateLang(lang);
+  const cat = await blogRepo.findBlogCategoryById(Number(id));
+  if (!cat) throw notFound('Danh mục không tồn tại');
+  if (!body.name || !body.name.trim()) throw badRequest('Tên bản dịch là bắt buộc');
+  if (body.name.length > 100) throw badRequest('Tên bản dịch quá dài (tối đa 100 ký tự)');
+  return blogRepo.upsertBlogCategoryTranslation(Number(id), lang, { name: body.name.trim() });
 }

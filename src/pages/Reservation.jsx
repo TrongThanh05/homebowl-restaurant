@@ -1,16 +1,31 @@
 // src/pages/Reservation.jsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import { getImage } from '../utils/images';
+import { useLanguage } from '../i18n/languageContext';
 import {
   timeOptions,
-  peopleOptions,
   selectCustomStyles,
   renderCustomDatePickerHeader,
 } from '../utils/reservationConstants';
 
 export default function Reservation() {
+  const { t } = useLanguage();
+
+  const peopleOptions = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => {
+        const count = i + 1;
+        const label =
+          count === 1
+            ? t('booking.people.one', { count })
+            : t('booking.people.other', { count });
+        return { value: String(count), label };
+      }),
+    [t],
+  );
+
   const [startDate, setStartDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(timeOptions[0]);
   const [selectedPeople, setSelectedPeople] = useState(peopleOptions[0]);
@@ -30,7 +45,7 @@ export default function Reservation() {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(
-      `Booking Details:\nDate: ${startDate.toLocaleDateString()}\nTime: ${selectedTime?.value}\nGuests: ${selectedPeople?.value}\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}`
+      `${t('booking.submit')}:\n${t('booking.date')}: ${startDate.toLocaleDateString()}\n${t('booking.time')}: ${selectedTime?.value}\n${t('booking.people')}: ${selectedPeople?.label}\n${t('booking.name')}: ${formData.name}\n${t('booking.phone')}: ${formData.phone}\n${t('booking.email')}: ${formData.email}`
     );
   };
 
@@ -41,7 +56,7 @@ export default function Reservation() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-02.jpg')})` }}
       >
-        <h2 className="tit6 t-center">Reservation</h2>
+        <h2 className="tit6 t-center">{t('nav.reservation')}</h2>
       </section>
 
       {/* Reservation Section */}
@@ -50,9 +65,9 @@ export default function Reservation() {
           <div className="row">
             <div className="col-lg-12 p-b-30">
               <div className="t-center">
-                <span className="tit2 t-center">Reservation</span>
+                <span className="tit2 t-center">{t('booking.subtitle')}</span>
 
-                <h3 className="tit3 t-center m-b-35 m-t-2">Book table</h3>
+                <h3 className="tit3 t-center m-b-35 m-t-2">{t('booking.title')}</h3>
               </div>
 
               <form
@@ -62,7 +77,7 @@ export default function Reservation() {
                 <div className="row">
                   <div className="col-md-4">
                     {/* Date */}
-                    <span className="txt9">Date</span>
+                    <span className="txt9">{t('booking.date')}</span>
 
                     <div className="wrap-inputdate pos-relative txt10 size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <DatePicker
@@ -81,7 +96,7 @@ export default function Reservation() {
 
                   <div className="col-md-4">
                     {/* Time */}
-                    <span className="txt9">Time</span>
+                    <span className="txt9">{t('booking.time')}</span>
 
                     <div className="wrap-inputtime size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <Select
@@ -96,7 +111,7 @@ export default function Reservation() {
 
                   <div className="col-md-4">
                     {/* People */}
-                    <span className="txt9">People</span>
+                    <span className="txt9">{t('booking.people')}</span>
 
                     <div className="wrap-inputpeople size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <Select
@@ -113,14 +128,14 @@ export default function Reservation() {
                 <div className="row">
                   <div className="col-md-4">
                     {/* Name */}
-                    <span className="txt9">Name</span>
+                    <span className="txt9">{t('booking.name')}</span>
 
                     <div className="wrap-inputname size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <input
                         className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                         type="text"
                         name="name"
-                        placeholder="Name"
+                        placeholder={t('booking.name')}
                         value={formData.name}
                         onChange={handleChange}
                         required
@@ -130,14 +145,14 @@ export default function Reservation() {
 
                   <div className="col-md-4">
                     {/* Phone */}
-                    <span className="txt9">Phone</span>
+                    <span className="txt9">{t('booking.phone')}</span>
 
                     <div className="wrap-inputphone size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <input
                         className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                         type="tel"
                         name="phone"
-                        placeholder="Phone"
+                        placeholder={t('booking.phone')}
                         value={formData.phone}
                         onChange={handleChange}
                         required
@@ -147,14 +162,14 @@ export default function Reservation() {
 
                   <div className="col-md-4">
                     {/* Email */}
-                    <span className="txt9">Email</span>
+                    <span className="txt9">{t('booking.email')}</span>
 
                     <div className="wrap-inputemail size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                       <input
                         className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                         type="email"
                         name="email"
-                        placeholder="Email"
+                        placeholder={t('booking.email')}
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -168,7 +183,7 @@ export default function Reservation() {
                     type="submit"
                     className="btn3 flex-c-m size13 txt11 trans-0-4"
                   >
-                    Book Table
+                    {t('booking.submit')}
                   </button>
                 </div>
               </form>
@@ -177,7 +192,7 @@ export default function Reservation() {
 
           <div className="info-reservation flex-w p-t-80">
             <div className="size23 w-full-md p-t-40 p-r-30 p-r-0-md">
-              <h4 className="txt5 m-b-18">Reserve by Phone</h4>
+              <h4 className="txt5 m-b-18">{t('booking.reserveByPhone')}</h4>
 
               <p className="size25">
                 Donec quis euismod purus. Donec feugiat ligula rhoncus, varius nisl sed, tincidunt lectus.{' '}
@@ -188,7 +203,7 @@ export default function Reservation() {
             </div>
 
             <div className="size24 w-full-md p-t-40">
-              <h4 className="txt5 m-b-18">For Event Booking</h4>
+              <h4 className="txt5 m-b-18">{t('booking.eventBooking')}</h4>
 
               <p className="size26">
                 Donec feugiat ligula rhoncus:{' '}

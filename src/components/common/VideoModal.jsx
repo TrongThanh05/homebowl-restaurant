@@ -1,7 +1,9 @@
 // src/components/common/VideoModal.jsx
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 
 const VideoModal = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   return (
     <>
       <div
@@ -20,7 +22,7 @@ const VideoModal = ({ isOpen, onClose }) => {
         >
           <div
             className="close-mo-video-01 trans-0-4"
-            aria-label="Close"
+            aria-label={t('common.close')}
             onClick={onClose}
             role="button"
             tabIndex={0}
@@ -37,7 +39,7 @@ const VideoModal = ({ isOpen, onClose }) => {
                 <iframe
                   src="https://www.youtube.com/embed/5k1hSu2gdKE?autoplay=1&rel=0&showinfo=0"
                   allowFullScreen
-                  title="Restaurant Video"
+                  title={t('video.modalTitle')}
                 ></iframe>
               )}
             </div>

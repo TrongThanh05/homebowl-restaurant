@@ -1,3 +1,5 @@
+import { useLanguage } from '../../i18n/languageContext';
+
 const footerGallery = Array.from({ length: 12 }, (_, i) => {
   const num = String(i + 1).padStart(2, '0');
   return {
@@ -7,12 +9,13 @@ const footerGallery = Array.from({ length: 12 }, (_, i) => {
 });
 
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="bg1">
       <div className="container p-t-40 p-b-70">
         <div className="row">
           <div className="col-sm-6 col-md-4 p-t-50">
-            <h4 className="txt13 m-b-33">Contact Us</h4>
+            <h4 className="txt13 m-b-33">{t('footer.contactUs')}</h4>
 
             <ul className="m-b-70">
               <li className="txt14 m-b-14">
@@ -39,16 +42,16 @@ export default function Footer() {
                 contact@site.com
               </li>
             </ul>
-            <h4 className="txt13 m-b-32">Opening Times</h4>
+            <h4 className="txt13 m-b-32">{t('footer.openingTimes')}</h4>
 
             <ul>
               <li className="txt14">09:30 AM – 11:00 PM</li>
-              <li className="txt14">Every Day</li>
+              <li className="txt14">{t('common.everyDay')}</li>
             </ul>
           </div>
 
           <div className="col-sm-6 col-md-4 p-t-50">
-            <h4 className="txt13 m-b-33">Latest twitter</h4>
+            <h4 className="txt13 m-b-33">{t('footer.latestTwitter')}</h4>
 
             <div className="m-b-25">
               <a
@@ -96,7 +99,7 @@ export default function Footer() {
           </div>
 
           <div className="col-sm-6 col-md-4 p-t-50">
-            <h4 className="txt13 m-b-38">Gallery</h4>
+            <h4 className="txt13 m-b-38">{t('footer.gallery')}</h4>
 
             <div className="wrap-gallery-footer flex-w">
               {footerGallery.map((item, index) => (
@@ -130,7 +133,7 @@ export default function Footer() {
             </div>
 
             <div className="txt17 p-r-20 p-t-5 p-b-5">
-              Copyright &copy; 2018 All rights reserved | This template is made
+              {t('footer.copyright', { year: new Date().getFullYear() })} | This template is made
               with <i className="fa fa-heart"></i> by{' '}
               <a href="https://colorlib.com" target="_blank" rel="noopener noreferrer">
                 Colorlib

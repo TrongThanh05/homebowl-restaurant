@@ -4,22 +4,28 @@ import { getPool, sql } from '../config/database.js';
 
 // ── POSTS ────────────────────────────────────────────────────
 
-export async function listPosts(page, pageSize, categorySlug) {
+export async function listPosts(page, pageSize, categorySlug, lang = 'vi') {
   const pool = await getPool();
   const offset = (page - 1) * pageSize;
   const result = await pool.request()
     .input('categorySlug', sql.NVarChar, categorySlug ?? null)
     .input('offset', sql.Int, offset)
     .input('pageSize', sql.Int, pageSize)
+    .input('lang', sql.VarChar(5), lang)
     .query(`
       SELECT DISTINCT
-        p.id, p.title, p.slug, p.excerpt, p.image_url, p.view_count,
+        p.id,
+        COALESCE(NULLIF(bpt.title, N''), p.title)     AS title,
+        p.slug,
+        COALESCE(NULLIF(bpt.excerpt, N''), p.excerpt) AS excerpt,
+        p.image_url, p.view_count,
         p.is_published, p.published_at, p.created_at,
         e.full_name AS author_name,
         (SELECT COUNT(1) FROM blog_comments bc
          WHERE bc.post_id = p.id AND bc.is_approved = 1) AS comment_count
       FROM blog_posts p
       LEFT JOIN employees e ON e.user_id = p.author_id
+      LEFT JOIN blog_post_translations bpt ON bpt.post_id = p.id AND bpt.lang_code = @lang
       LEFT JOIN blog_post_categories bpc ON bpc.post_id = p.id
       LEFT JOIN blog_categories bc2 ON bc2.id = bpc.category_id
       WHERE p.is_published = 1
@@ -45,7 +51,7 @@ export async function countPosts(categorySlug) {
   return result.recordset[0].total;
 }
 
-export async function findPostBySlug(slug) {
+export async function findPostBySlug(slug, lang = 'vi') {
   const pool = await getPool();
   // Increment view count and return
   await pool.request()
@@ -54,10 +60,20 @@ export async function findPostBySlug(slug) {
 
   const result = await pool.request()
     .input('slug', sql.NVarChar, slug)
+    .input('lang', sql.VarChar(5), lang)
     .query(`
-      SELECT p.*, e.full_name AS author_name
+      SELECT p.id, p.author_id,
+             COALESCE(NULLIF(bpt.title, N''), p.title)     AS title,
+             p.slug,
+             COALESCE(NULLIF(bpt.excerpt, N''), p.excerpt) AS excerpt,
+             COALESCE(NULLIF(bpt.content, N''), p.content) AS content,
+             p.image_url,
+             COALESCE(NULLIF(bpt.tags, N''), p.tags)       AS tags,
+             p.view_count, p.is_published, p.published_at, p.created_at,
+             e.full_name AS author_name
       FROM blog_posts p
       LEFT JOIN employees e ON e.user_id = p.author_id
+      LEFT JOIN blog_post_translations bpt ON bpt.post_id = p.id AND bpt.lang_code = @lang
       WHERE p.slug = @slug
     `);
   return result.recordset[0] || null;
@@ -151,15 +167,22 @@ export async function updatePost(id, fields) {
   return result.recordset[0] || null;
 }
 
-export async function getMostViewed(limit = 5) {
+export async function getMostViewed(limit = 5, lang = 'vi') {
   const pool = await getPool();
   const result = await pool.request()
     .input('limit', sql.Int, limit)
+    .input('lang', sql.VarChar(5), lang)
     .query(`
-      SELECT TOP(@limit) id, title, slug, excerpt, image_url, view_count, published_at
-      FROM blog_posts
-      WHERE is_published = 1
-      ORDER BY view_count DESC
+      SELECT TOP(@limit)
+        p.id,
+        COALESCE(NULLIF(bpt.title, N''), p.title)     AS title,
+        p.slug,
+        COALESCE(NULLIF(bpt.excerpt, N''), p.excerpt) AS excerpt,
+        p.image_url, p.view_count, p.published_at
+      FROM blog_posts p
+      LEFT JOIN blog_post_translations bpt ON bpt.post_id = p.id AND bpt.lang_code = @lang
+      WHERE p.is_published = 1
+      ORDER BY p.view_count DESC
     `);
   return result.recordset;
 }
@@ -180,16 +203,20 @@ export async function getArchive() {
 
 // ── CATEGORIES ────────────────────────────────────────────────
 
-export async function listBlogCategories() {
+export async function listBlogCategories(lang = 'vi') {
   const pool = await getPool();
   const result = await pool.request()
+    .input('lang', sql.VarChar(5), lang)
     .query(`
-      SELECT bc.id, bc.name, bc.slug, bc.sort_order,
+      SELECT bc.id,
+             COALESCE(NULLIF(bct.name, N''), bc.name) AS name,
+             bc.slug, bc.sort_order,
              COUNT(bpc.post_id) AS post_count
       FROM blog_categories bc
+      LEFT JOIN blog_category_translations bct ON bct.category_id = bc.id AND bct.lang_code = @lang
       LEFT JOIN blog_post_categories bpc ON bpc.category_id = bc.id
       LEFT JOIN blog_posts p ON p.id = bpc.post_id AND p.is_published = 1
-      GROUP BY bc.id, bc.name, bc.slug, bc.sort_order
+      GROUP BY bc.id, bc.name, bct.name, bc.slug, bc.sort_order
       ORDER BY bc.sort_order
     `);
   return result.recordset;
@@ -200,6 +227,14 @@ export async function findBlogCategoryBySlug(slug) {
   const result = await pool.request()
     .input('slug', sql.NVarChar, slug)
     .query('SELECT * FROM blog_categories WHERE slug = @slug');
+  return result.recordset[0] || null;
+}
+
+export async function findBlogCategoryById(id) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query('SELECT * FROM blog_categories WHERE id = @id');
   return result.recordset[0] || null;
 }
 
@@ -271,4 +306,81 @@ export async function countPendingComments() {
   const result = await pool.request()
     .query('SELECT COUNT(1) AS total FROM blog_comments WHERE is_approved = 0');
   return result.recordset[0].total;
+}
+
+// ── TRANSLATIONS ─────────────────────────────────────────────
+
+export async function getPostTranslations(postId) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, postId)
+    .query(`
+      SELECT lang_code, title, excerpt, content, tags, updated_at
+      FROM blog_post_translations
+      WHERE post_id = @id
+      ORDER BY lang_code
+    `);
+  return result.recordset;
+}
+
+export async function upsertPostTranslation(postId, langCode, { title, excerpt, content, tags }) {
+  const pool = await getPool();
+  const tx = pool.transaction();
+  await tx.begin();
+  try {
+    const upd = await new sql.Request(tx)
+      .input('id', sql.Int, postId)
+      .input('lang', sql.VarChar(5), langCode)
+      .input('title', sql.NVarChar(200), title)
+      .input('excerpt', sql.NVarChar(500), excerpt ?? null)
+      .input('content', sql.NVarChar(sql.MAX), content ?? null)
+      .input('tags', sql.NVarChar(200), tags ?? null)
+      .query(`UPDATE blog_post_translations WITH (UPDLOCK, HOLDLOCK)
+              SET title = @title, excerpt = @excerpt, content = @content, tags = @tags, updated_at = SYSDATETIME()
+              WHERE post_id = @id AND lang_code = @lang`);
+    if (upd.rowsAffected[0] === 0) {
+      await new sql.Request(tx)
+        .input('id', sql.Int, postId)
+        .input('lang', sql.VarChar(5), langCode)
+        .input('title', sql.NVarChar(200), title)
+        .input('excerpt', sql.NVarChar(500), excerpt ?? null)
+        .input('content', sql.NVarChar(sql.MAX), content ?? null)
+        .input('tags', sql.NVarChar(200), tags ?? null)
+        .query(`INSERT INTO blog_post_translations (post_id, lang_code, title, excerpt, content, tags)
+                VALUES (@id, @lang, @title, @excerpt, @content, @tags)`);
+    }
+    await tx.commit();
+    return { post_id: postId, lang_code: langCode, title, excerpt, content, tags };
+  } catch (err) {
+    await tx.rollback();
+    throw err;
+  }
+}
+
+export async function upsertBlogCategoryTranslation(categoryId, langCode, { name }) {
+  const pool = await getPool();
+  const tx = pool.transaction();
+  await tx.begin();
+  try {
+    const upd = await new sql.Request(tx)
+      .input('id', sql.Int, categoryId)
+      .input('lang', sql.VarChar(5), langCode)
+      .input('name', sql.NVarChar(100), name)
+      .query(`UPDATE blog_category_translations WITH (UPDLOCK, HOLDLOCK)
+              SET name = @name, updated_at = SYSDATETIME()
+              WHERE category_id = @id AND lang_code = @lang`);
+    if (upd.rowsAffected[0] === 0) {
+      await new sql.Request(tx)
+        .input('id', sql.Int, categoryId)
+        .input('lang', sql.VarChar(5), langCode)
+        .input('name', sql.NVarChar(100), name)
+        .query(`INSERT INTO blog_category_translations (category_id, lang_code, name)
+                VALUES (@id, @lang, @name)`);
+    }
+    await tx.commit();
+    return { category_id: categoryId, lang_code: langCode, name };
+  } catch (err) {
+    await tx.rollback();
+    throw err;
+  }
 }

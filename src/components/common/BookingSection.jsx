@@ -1,18 +1,25 @@
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
+import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 import {
   timeOptions,
-  peopleOptions,
   selectCustomStyles,
   renderCustomDatePickerHeader,
 } from '../../utils/reservationConstants';
 
 const BookingSection = () => {
+  const { t } = useLanguage();
   const [startDate, setStartDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(timeOptions[0]);
-  const [selectedGuest, setSelectedGuest] = useState(peopleOptions[0]);
+
+  const peopleOpts = Array.from({ length: 12 }, (_, i) => ({
+    value: i + 1,
+    label: t(i === 0 ? 'booking.people.one' : 'booking.people.other', { count: i + 1 }),
+  }));
+  const [selectedGuest, setSelectedGuest] = useState(peopleOpts[0]);
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -29,7 +36,7 @@ const BookingSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(
-      `Booking Details:\nDate: ${startDate.toLocaleDateString()}\nTime: ${selectedTime?.value}\nGuests: ${selectedGuest?.value}\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}`
+      `${t('booking.title')}:\n${t('booking.date')}: ${startDate.toLocaleDateString()}\n${t('booking.time')}: ${selectedTime?.value}\n${t('booking.guests')}: ${selectedGuest?.value}\n${t('booking.name')}: ${formData.name}\n${t('booking.phone')}: ${formData.phone}\n${t('booking.email')}: ${formData.email}`
     );
   };
 
@@ -39,16 +46,16 @@ const BookingSection = () => {
         <div className="row">
           <div className="col-lg-6 p-b-30">
             <div className="t-center">
-              <span className="tit2 t-center">Reservation</span>
+              <span className="tit2 t-center">{t('booking.subtitle')}</span>
 
-              <h3 className="tit3 t-center m-b-35 m-t-2">Book table</h3>
+              <h3 className="tit3 t-center m-b-35 m-t-2">{t('booking.title')}</h3>
             </div>
 
             <form className="wrap-form-booking" onSubmit={handleSubmit}>
               <div className="row">
                 <div className="col-md-6">
                   {/* Date */}
-                  <span className="txt9">Date</span>
+                  <span className="txt9">{t('booking.date')}</span>
                   <div className="wrap-inputdate pos-relative txt10 size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <DatePicker
                       selected={startDate}
@@ -64,7 +71,7 @@ const BookingSection = () => {
                   </div>
 
                   {/* Time */}
-                  <span className="txt9">Time</span>
+                  <span className="txt9">{t('booking.time')}</span>
                   <div className="wrap-inputtime size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <Select
                       value={selectedTime}
@@ -76,12 +83,12 @@ const BookingSection = () => {
                   </div>
 
                   {/* Guests */}
-                  <span className="txt9">Guests</span>
+                  <span className="txt9">{t('booking.guests')}</span>
                   <div className="wrap-inputguest size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <Select
                       value={selectedGuest}
                       onChange={setSelectedGuest}
-                      options={peopleOptions}
+                      options={peopleOpts}
                       styles={selectCustomStyles}
                       isSearchable={false}
                     />
@@ -90,13 +97,13 @@ const BookingSection = () => {
 
                 <div className="col-md-6">
                   {/* Name */}
-                  <span className="txt9">Name</span>
+                  <span className="txt9">{t('booking.name')}</span>
                   <div className="wrap-inputname size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <input
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="text"
                       name="name"
-                      placeholder="Name"
+                      placeholder={t('booking.name')}
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -104,13 +111,13 @@ const BookingSection = () => {
                   </div>
 
                   {/* Phone */}
-                  <span className="txt9">Phone</span>
+                  <span className="txt9">{t('booking.phone')}</span>
                   <div className="wrap-inputphone size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <input
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="tel"
                       name="phone"
-                      placeholder="Phone"
+                      placeholder={t('booking.phone')}
                       value={formData.phone}
                       onChange={handleChange}
                       required
@@ -118,13 +125,13 @@ const BookingSection = () => {
                   </div>
 
                   {/* Email */}
-                  <span className="txt9">Email</span>
+                  <span className="txt9">{t('booking.email')}</span>
                   <div className="wrap-inputemail size12 bo2 bo-rad-10 m-t-3 m-b-23 bgwhite">
                     <input
                       className="bo-rad-10 sizefull txt10 p-l-20 border-0"
                       type="email"
                       name="email"
-                      placeholder="Email"
+                      placeholder={t('booking.email')}
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -138,7 +145,7 @@ const BookingSection = () => {
                   type="submit"
                   className="btn3 flex-c-m size13 txt11 trans-0-4"
                 >
-                  Book Table
+                  {t('booking.submit')}
                 </button>
               </div>
             </form>

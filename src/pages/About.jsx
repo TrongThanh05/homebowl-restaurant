@@ -1,6 +1,7 @@
 // src/pages/About.jsx
 import { useState } from 'react';
 import { getImage } from '../utils/images';
+import { useLanguage } from '../i18n/languageContext';
 import SignUpSection from '../components/common/SignUpSection';
 import VideoModal from '../components/common/VideoModal';
 
@@ -29,6 +30,7 @@ const chefs = [
 ];
 
 export default function About() {
+  const { t } = useLanguage();
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   return (
@@ -38,14 +40,14 @@ export default function About() {
         className="bg-title-page flex-c-m p-t-160 p-b-80 p-l-15 p-r-15"
         style={{ backgroundImage: `url(${getImage('bg-title-page-03.jpg')})` }}
       >
-        <h2 className="tit6 t-center">About Us</h2>
+        <h2 className="tit6 t-center">{t('about.pageTitle')}</h2>
       </section>
 
       {/* Our Story */}
       <section className="bg2-pattern p-t-116 p-b-110 t-center p-l-15 p-r-15">
-        <span className="tit2 t-center">Italian Restaurant</span>
+        <span className="tit2 t-center">{t('welcome.subtitle')}</span>
 
-        <h3 className="tit3 t-center m-b-35 m-t-5">Our Story</h3>
+        <h3 className="tit3 t-center m-b-35 m-t-5">{t('welcome.story')}</h3>
 
         <p className="t-center size32 m-l-r-auto">
           Fusce at risus eget mi auctor pulvinar. Suspendisse maximus venenatis pretium.
@@ -64,9 +66,9 @@ export default function About() {
         style={{ backgroundImage: `url(${getImage('header-menu-01.jpg')})` }}
       >
         <div className="content-video t-center p-t-225 p-b-250">
-          <span className="tit2 p-l-15 p-r-15">Discover</span>
+          <span className="tit2 p-l-15 p-r-15">{t('common.discover')}</span>
 
-          <h3 className="tit4 t-center p-l-15 p-r-15 p-t-3">Our Video</h3>
+          <h3 className="tit4 t-center p-l-15 p-r-15 p-t-3">{t('video.title')}</h3>
 
           <button
             type="button"
@@ -74,7 +76,7 @@ export default function About() {
             data-toggle="modal"
             data-target="#modal-video-01"
             onClick={() => setIsVideoOpen(true)}
-            aria-label="Play video"
+            aria-label={t('common.playVideo')}
           >
             <div className="flex-c-m sizefull bo-cir bgwhite color1 hov1 trans-0-4">
               <i className="fa fa-play fs-18 m-l-2" aria-hidden="true"></i>
@@ -90,9 +92,9 @@ export default function About() {
           <div className="row">
             <div className="col-md-6 p-t-45 p-b-30">
               <div className="wrap-text-delicious t-center">
-                <span className="tit2 t-center">Delicious</span>
+                <span className="tit2 t-center">{t('about.recipes.kicker')}</span>
 
-                <h3 className="tit3 t-center m-b-35 m-t-5">RECIPES</h3>
+                <h3 className="tit3 t-center m-b-35 m-t-5">{t('about.recipes.title')}</h3>
 
                 <p className="t-center m-b-22 size3 m-l-r-auto">
                   Donec quis lorem nulla. Nunc eu odio mi. Morbi nec lobortis est. Sed
@@ -119,9 +121,9 @@ export default function About() {
 
             <div className="col-md-6 p-t-45 p-b-30">
               <div className="wrap-text-romantic t-center">
-                <span className="tit2 t-center">Romantic</span>
+                <span className="tit2 t-center">{t('about.romantic.kicker')}</span>
 
-                <h3 className="tit3 t-center m-b-35 m-t-5">Restaurant</h3>
+                <h3 className="tit3 t-center m-b-35 m-t-5">{t('about.romantic.title')}</h3>
 
                 <p className="t-center m-b-22 size3 m-l-r-auto">
                   Fusce iaculis, quam quis volutpat cursus, tellus quam varius eros, in
@@ -145,9 +147,9 @@ export default function About() {
       {/* Chef */}
       <section className="section-chef bgwhite p-t-115 p-b-95">
         <div className="container t-center">
-          <span className="tit2 t-center">Meet Our</span>
+          <span className="tit2 t-center">{t('about.chef.meetOur')}</span>
 
-          <h3 className="tit5 t-center m-b-50 m-t-5">Chef</h3>
+          <h3 className="tit5 t-center m-b-50 m-t-5">{t('about.chef.chef')}</h3>
 
           <div className="row">
             {chefs.map((chef) => (
