@@ -1,4 +1,5 @@
 // src/pages/Home.jsx
+import { useState } from 'react';
 import BlogSection from '../components/common/BlogSection';
 import BookingSection from '../components/common/BookingSection';
 import EventSection from '../components/common/EventSection';
@@ -12,6 +13,8 @@ import VideoSection from '../components/common/VideoSection';
 import WelcomeSection from '../components/common/WelcomeSection';
 
 export default function Home() {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   return (
     <>
       <HeroSlider />
@@ -21,11 +24,11 @@ export default function Home() {
       <EventSection />
       <BookingSection />
       <ReviewSection />
-      <VideoSection />
+      <VideoSection onOpenVideo={() => setIsVideoOpen(true)} />
       <BlogSection />
       <SignUpSection />
       <div id="dropDownSelect1"></div>
-      <VideoModal />
+      <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
     </>
   );
 }

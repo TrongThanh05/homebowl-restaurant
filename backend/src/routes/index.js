@@ -15,6 +15,7 @@ import reviewsRoutes from './reviews.routes.js';
 import newsletterRoutes from './newsletter.routes.js';
 import blogRoutes from './blog.routes.js';
 import galleryRoutes from './gallery.routes.js';
+import eventsRoutes from './events.routes.js';
 import settingsRoutes from './settings.routes.js';
 import reportsRoutes from './reports.routes.js';
 
@@ -34,6 +35,7 @@ export function createApiRouter() {
   router.use('/api', newsletterRoutes);
   router.use('/api', blogRoutes);
   router.use('/api', galleryRoutes);
+  router.use('/api', eventsRoutes);
   router.use('/api', settingsRoutes);
   router.use('/api', reportsRoutes);
 

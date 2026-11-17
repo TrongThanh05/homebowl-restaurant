@@ -55,7 +55,7 @@ const renderStars = (rating = 5) => {
 };
 
 const getAvatarUrl = (review, index) => {
-  const custom = review.avatar_url || review.avatar;
+  const custom = review.avatar || 'avatar-01.jpg';
   if (custom) {
     return custom.startsWith('http') ? custom : getImage(custom);
   }
@@ -119,10 +119,7 @@ export default function ReviewSection() {
       </div>
     ),
     customPaging: (i) => (
-      <button
-        type="button"
-        aria-label={t('common.slideN', { n: i + 1 })}
-      />
+      <button type="button" aria-label={t('common.slideN', { n: i + 1 })} />
     ),
     beforeChange: (_oldIndex, newIndex) => setCurrent(newIndex),
     afterChange: (index) => setCurrent(index),

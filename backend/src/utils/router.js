@@ -22,6 +22,7 @@ function createRouter() {
 
   function get(path, ...handlers) { addRoute('GET', path, handlers); }
   function post(path, ...handlers) { addRoute('POST', path, handlers); }
+  function put(path, ...handlers) { addRoute('PUT', path, handlers); }
   function patch(path, ...handlers) { addRoute('PATCH', path, handlers); }
   function del(path, ...handlers) { addRoute('DELETE', path, handlers); }
 
@@ -77,7 +78,7 @@ function createRouter() {
     return false; // not matched
   }
 
-  return { get, post, patch, delete: del, use, handle, routes };
+  return { get, post, put, patch, delete: del, use, handle, routes };
 }
 
 export { createRouter };

@@ -1,5 +1,6 @@
 // src/components/layout/Header.jsx
-import { Link, NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../i18n/languageContext';
 import LanguageSelect from '../../i18n/LanguageSelect';
 import logo from '../../assets/images/icons/logo.png';
@@ -17,14 +18,54 @@ const links = [
 
 const Header = ({ onOpenSidebar }) => {
   const { t } = useLanguage();
+  const location = useLocation();
+  const [hasBackground, setHasBackground] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Tìm kích thước slider trên trang Home hoặc banner tiêu đề trên các trang khác
+      const slider = document.querySelector('.section-slide');
+      let threshold;
+
+      if (slider) {
+        // Khi lăn chuột xuống dưới cùng của kích thước slider
+        threshold = slider.offsetTop + slider.offsetHeight - 90;
+      } else {
+        const titlePage = document.querySelector('.bg-title-page');
+        threshold = titlePage
+          ? titlePage.offsetTop + titlePage.offsetHeight - 90
+          : 100;
+      }
+
+      const currentScrollY =
+        window.pageYOffset || document.documentElement.scrollTop;
+      setHasBackground(currentScrollY >= threshold);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [location.pathname]);
+
   return (
-    <header>
-      <div className="wrap-menu-header gradient1 trans-0-4">
+    <header className={hasBackground ? 'header-fixed' : ''}>
+      <div
+        className={`wrap-menu-header ${hasBackground ? '' : 'gradient1'} trans-0-4`}
+      >
         <div className="container h-full">
           <div className="wrap_header trans-0-3 flex-nowrap">
             <div className="logo flex-shrink-0">
               <Link to="/" className="logo">
-                <img src={logo} alt="IMG-LOGO" data-logofixed={logo2} />
+                <img
+                  src={hasBackground ? logo2 : logo}
+                  alt="IMG-LOGO"
+                  className="trans-0-3"
+                />
               </Link>
             </div>
 
