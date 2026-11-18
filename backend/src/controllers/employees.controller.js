@@ -12,6 +12,14 @@ export async function listEmployees(req, res) {
   } catch (err) { sendError(res, err); }
 }
 
+export async function listChefs(req, res) {
+  try {
+    const query = Object.fromEntries(new URL('http://x' + req.url).searchParams);
+    const data = await employeesService.listChefs(query);
+    sendSuccess(res, data);
+  } catch (err) { sendError(res, err); }
+}
+
 export async function getEmployee(req, res) {
   try {
     const data = await employeesService.getEmployeeById(req.params.id);

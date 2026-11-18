@@ -4,7 +4,12 @@ import { useLanguage } from '../../i18n/languageContext';
 import { getImage } from '../../utils/images';
 import ownVideo from '../../assets/videos/own_video.mp4';
 
-const VideoSection = ({ onOpenVideo, playInline = true }) => {
+const VideoSection = ({
+  onOpenVideo,
+  playInline = true,
+  bgImage = 'bg-cover-video-02.jpg',
+  videoSrc = ownVideo,
+}) => {
   const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const sectionRef = useRef(null);
@@ -50,7 +55,7 @@ const VideoSection = ({ onOpenVideo, playInline = true }) => {
       ref={sectionRef}
       className="section-video parallax100"
       style={{
-        backgroundImage: `url(${getImage('bg-cover-video-02.jpg')})`,
+        backgroundImage: `url(${typeof bgImage === 'string' && (bgImage.startsWith('http') || bgImage.startsWith('/')) ? bgImage : getImage(bgImage)})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'relative',
@@ -138,7 +143,7 @@ const VideoSection = ({ onOpenVideo, playInline = true }) => {
             }}
           >
             <video
-              src={ownVideo}
+              src={videoSrc}
               controls
               autoPlay
               playsInline

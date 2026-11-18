@@ -5,11 +5,18 @@ import * as employeesRepo from '../repositories/employees.repository.js';
 import { findRoleByName, findUserByEmail } from '../repositories/auth.repository.js';
 import { badRequest, notFound, conflict } from '../utils/errors.js';
 
-export async function listEmployees(query) {
+export async function listEmployees(query = {}) {
   const isActive = query.isActive !== undefined
     ? (query.isActive === 'true' || query.isActive === '1')
     : undefined;
-  return employeesRepo.listEmployees(isActive);
+  const role = query.role || null;
+  const lang = query.lang || 'vi';
+  return employeesRepo.listEmployees({ isActive, role, lang });
+}
+
+export async function listChefs(query = {}) {
+  const lang = query.lang || 'vi';
+  return employeesRepo.listChefs(lang);
 }
 
 export async function getEmployeeById(id) {

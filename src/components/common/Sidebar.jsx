@@ -20,9 +20,6 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Menu liên kết */}
         <ul className="menu-sidebar p-t-95 p-b-70">
           <li className="t-center m-b-13">
-            <LanguageSelect className="sidebar-lang-select" short={false} />
-          </li>
-          <li className="t-center m-b-13">
             <Link to="/" className="txt19" onClick={onClose}>
               {t('nav.home')}
             </Link>

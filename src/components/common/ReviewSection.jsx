@@ -55,7 +55,7 @@ const renderStars = (rating = 5) => {
 };
 
 const getAvatarUrl = (review, index) => {
-  const custom = review.avatar || 'avatar-01.jpg';
+  const custom = review.avatar || 'default-avatar.png';
   if (custom) {
     return custom.startsWith('http') ? custom : getImage(custom);
   }
